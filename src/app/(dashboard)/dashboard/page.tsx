@@ -4,7 +4,7 @@ import { StackedAreaChart, DepartmentPie, LeadBarChart } from "@/components/stra
 
 async function getStats() {
   const outcomes = await prisma.outcome.findMany({
-    include: { focusArea: true, responsibleUser: true },
+    include: { focusArea: true, assignments: { include: { user: true } } },
   });
 
   const focusAreas = await prisma.focusArea.findMany();
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-zinc-500">
-                  {o.responsibleUser?.name || "Unassigned"}
+                  {o.assignments.map((a) => a.user.name).join(", ") || "Unassigned"}
                 </span>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full font-medium ${

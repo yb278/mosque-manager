@@ -23,7 +23,7 @@ export default async function OutcomePage({
     where: { id },
     include: {
       focusArea: true,
-      responsibleUser: true,
+      assignments: { include: { user: true } },
       milestones: true,
     },
   });
@@ -32,9 +32,10 @@ export default async function OutcomePage({
 
   const userId = Number(session.user.id);
   const isAdmin = session.user.role === "admin";
-  const isOwner = outcome.responsibleUserId === userId;
-  const canEdit = isAdmin || isOwner;
+  const isAssigned = outcome.assignments.some((a) => a.userId === userId);
+  const canEdit = isAdmin || isAssigned;
   const showEditMode = edit === "true" && isAdmin;
+  const assignedUsers = outcome.assignments.map((a) => a.user);
 
   if (showEditMode) {
     const users = await prisma.user.findMany({ orderBy: { name: "asc" } });
@@ -56,7 +57,7 @@ export default async function OutcomePage({
             riskIfNot: outcome.riskIfNot,
             targetDate: outcome.targetDate,
             actions: outcome.actions,
-            responsibleUserId: outcome.responsibleUserId,
+            userIds: outcome.assignments.map((a) => a.userId),
             milestones: outcome.milestones,
           }}
           users={users.map((u) => ({ id: u.id, name: u.name, email: u.email }))}
@@ -110,8 +111,8 @@ export default async function OutcomePage({
               <dd>{outcome.targetDate || "-"}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Owner</dt>
-              <dd>{outcome.responsibleUser?.name || "Unassigned"}</dd>
+              <dt className="text-zinc-500">Owner(s)</dt>
+              <dd>{assignedUsers.length > 0 ? assignedUsers.map((u) => u.name).join(", ") : "Unassigned"}</dd>
             </div>
             <div>
               <dt className="text-zinc-500">Department</dt>

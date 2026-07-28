@@ -7,7 +7,7 @@ async function getSession() {
 }
 
 const PROGRESS_FIELDS = ["status", "completePct", "notes", "reasonForDelay"] as const;
-const ADMIN_FIELDS = ["title", "benefit", "startingPoint", "desiredOutcome", "department", "riskLevel", "riskIfNot", "targetDate", "responsibleUserId", "actions", "archived"] as const;
+const ADMIN_FIELDS = ["title", "benefit", "startingPoint", "desiredOutcome", "department", "riskLevel", "riskIfNot", "targetDate", "actions", "archived"] as const;
 
 export async function PATCH(
   req: Request,
@@ -23,7 +23,7 @@ export async function PATCH(
 
   const outcome = await prisma.outcome.findUnique({
     where: { id },
-    include: { milestones: true },
+    include: { milestones: true, assignments: true },
   });
   if (!outcome) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -31,15 +31,15 @@ export async function PATCH(
 
   const userId = Number(session.user.id);
   const isAdmin = session.user.role === "admin";
-  const isOwner = outcome.responsibleUserId === userId;
+  const isAssigned = outcome.assignments.some((a) => a.userId === userId);
 
-  if (!isAdmin && !isOwner) {
+  if (!isAdmin && !isAssigned) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const data: Record<string, unknown> = {};
 
-  if (isOwner) {
+  if (isAssigned) {
     for (const field of PROGRESS_FIELDS) {
       if (body[field] !== undefined) data[field] = body[field];
     }
@@ -67,6 +67,15 @@ export async function PATCH(
             description: m.description,
             targetDate: m.targetDate || null,
           })),
+        });
+      }
+    }
+
+    if (isAdmin && body.userIds !== undefined) {
+      await tx.outcomeAssignment.deleteMany({ where: { outcomeId: id } });
+      if (body.userIds.length > 0) {
+        await tx.outcomeAssignment.createMany({
+          data: body.userIds.map((uid: number) => ({ outcomeId: id, userId: uid })),
         });
       }
     }

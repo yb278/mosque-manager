@@ -21,7 +21,7 @@ export default function OutcomeAdminEditor({
     riskIfNot: string | null;
     targetDate: string | null;
     actions: string | null;
-    responsibleUserId: number | null;
+    userIds: number[];
     milestones: { description: string; targetDate: string | null }[];
   };
   users: User[];
@@ -29,9 +29,16 @@ export default function OutcomeAdminEditor({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>(outcome.userIds);
   const [milestones, setMilestones] = useState<Milestone[]>(
     outcome.milestones.map((m) => ({ description: m.description, targetDate: m.targetDate || "" }))
   );
+
+  function toggleUser(id: number) {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+    );
+  }
 
   function addMilestone() {
     setMilestones([...milestones, { description: "", targetDate: "" }]);
@@ -64,7 +71,7 @@ export default function OutcomeAdminEditor({
       riskIfNot: form.get("riskIfNot"),
       targetDate: form.get("targetDate"),
       actions: form.get("actions"),
-      responsibleUserId: form.get("responsibleUserId") ? Number(form.get("responsibleUserId")) : null,
+      userIds: selectedUserIds,
       milestones: milestones.filter((m) => m.description.trim()),
     };
 
@@ -119,13 +126,15 @@ export default function OutcomeAdminEditor({
               <input name="targetDate" defaultValue={outcome.targetDate || ""} className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">Owner</label>
-              <select name="responsibleUserId" defaultValue={outcome.responsibleUserId ?? ""} className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="">Unassigned</option>
+              <label className="block text-sm font-medium text-zinc-700 mb-1">Owner(s)</label>
+              <div className="border border-zinc-300 rounded-lg p-2 max-h-40 overflow-y-auto space-y-1">
                 {users.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                  <label key={u.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-zinc-50 px-1 py-0.5 rounded">
+                    <input type="checkbox" checked={selectedUserIds.includes(u.id)} onChange={() => toggleUser(u.id)} className="rounded border-zinc-300 text-primary focus:ring-primary" />
+                    {u.name}
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
         </div>

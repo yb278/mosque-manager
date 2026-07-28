@@ -27,12 +27,12 @@ export default async function OutcomesPage({
   if (params.focusArea) where.focusAreaId = params.focusArea;
   if (params.status) where.status = params.status;
   if (params.my === "true" && session?.user) {
-    where.responsibleUserId = Number(session.user.id);
+    where.assignments = { some: { userId: Number(session.user.id) } };
   }
 
   const outcomes = await prisma.outcome.findMany({
     where,
-    include: { focusArea: true, responsibleUser: true },
+    include: { focusArea: true, assignments: { include: { user: true } } },
     orderBy: { id: "asc" },
   });
 
@@ -135,7 +135,7 @@ export default async function OutcomesPage({
                   <Link href={`/outcomes/${o.id}`} className="font-medium text-primary hover:text-primary">{o.title}</Link>
                 </td>
                 <td className="py-3 px-4 text-zinc-500 text-xs">{o.focusArea.name}</td>
-                <td className="py-3 px-4 text-zinc-600 text-xs">{o.responsibleUser?.name || "-"}</td>
+                <td className="py-3 px-4 text-zinc-600 text-xs">{o.assignments.map((a) => a.user.name).join(", ") || "-"}</td>
                 <td className="py-3 px-4">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[o.status]}`}>{o.status.replace("_", " ")}</span>
                 </td>
@@ -165,7 +165,7 @@ export default async function OutcomesPage({
             </div>
             <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
               <span>{o.focusArea.name}</span>
-              <span>{o.responsibleUser?.name || "Unassigned"}</span>
+              <span>{o.assignments.map((a) => a.user.name).join(", ") || "Unassigned"}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-zinc-200 rounded-full h-2">

@@ -13,6 +13,13 @@ export default function CreateOutcomeForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+
+  function toggleUser(id: number) {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+    );
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,7 +34,7 @@ export default function CreateOutcomeForm({
         focusAreaId: form.get("focusAreaId"),
         title: form.get("title"),
         department: form.get("department"),
-        responsibleUserId: form.get("responsibleUserId") || null,
+        userIds: selectedUserIds,
         riskLevel: form.get("riskLevel"),
         targetDate: form.get("targetDate"),
         benefit: form.get("benefit"),
@@ -69,11 +76,15 @@ export default function CreateOutcomeForm({
           <input name="department" type="text" className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-1">Responsible User</label>
-          <select name="responsibleUserId" className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-            <option value="">Unassigned</option>
-            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-          </select>
+          <label className="block text-sm font-medium text-zinc-700 mb-1">Owner(s)</label>
+          <div className="border border-zinc-300 rounded-lg p-2 max-h-40 overflow-y-auto space-y-1">
+            {users.map((u) => (
+              <label key={u.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-zinc-50 px-1 py-0.5 rounded">
+                <input type="checkbox" checked={selectedUserIds.includes(u.id)} onChange={() => toggleUser(u.id)} className="rounded border-zinc-300 text-primary focus:ring-primary" />
+                {u.name}
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 

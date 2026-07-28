@@ -93,11 +93,13 @@ async function main() {
   const userSet = new Set<string>();
   const userRows: { name: string; email: string }[] = [];
   for (const row of dataRows) {
-    const person = String(row.responsiblePerson || "").trim();
-    if (person && !userSet.has(person)) {
-      userSet.add(person);
-      const email = `${person.toLowerCase().replace(/\s+/g, ".")}@aec.org`;
-      userRows.push({ name: person, email });
+    const persons = String(row.responsiblePerson || "").split("/").map(s => s.trim()).filter(Boolean);
+    for (const person of persons) {
+      if (person && !userSet.has(person)) {
+        userSet.add(person);
+        const email = `${person.toLowerCase().replace(/\s+/g, ".")}@aec.org`;
+        userRows.push({ name: person, email });
+      }
     }
   }
 
@@ -132,6 +134,7 @@ async function main() {
 
   // --- Seed outcomes ---
   console.log("Seeding outcomes...");
+  const outcomeAssignments: { outcomeId: string; email: string }[] = [];
   for (const row of dataRows) {
     const focusAreaName = String(row.focusArea || "").trim();
     if (!focusAreaName || !FOCUS_AREA_IDS[focusAreaName]) continue;
@@ -140,10 +143,12 @@ async function main() {
     if (!rawId) continue;
 
     const outcomeId = extractOutcomeId(rawId, focusAreaName);
-    const personName = String(row.responsiblePerson || "").trim();
-    const personEmail = personName
-      ? `${personName.toLowerCase().replace(/\s+/g, ".")}@aec.org`
-      : undefined;
+    const persons = String(row.responsiblePerson || "").split("/").map(s => s.trim()).filter(Boolean);
+
+    for (const person of persons) {
+      const email = `${person.toLowerCase().replace(/\s+/g, ".")}@aec.org`;
+      outcomeAssignments.push({ outcomeId, email });
+    }
 
     await prisma.outcome.create({
       data: {
@@ -155,7 +160,6 @@ async function main() {
         startingPoint: String(row.startingPoint || "").trim() || null,
         department: String(row.department || "").trim() || null,
         reportedToOpex: String(row.reportedToOpex || "").trim() || null,
-        responsibleUserId: personEmail ? (userByEmail.get(personEmail)?.id ?? null) : null,
         riskLevel: String(row.riskLevel || "").trim() || null,
         riskIfNot: String(row.riskIfNot || "").trim() || null,
         targetDate: String(row.targetDate || "").trim() || null,
@@ -168,6 +172,16 @@ async function main() {
         notes: String(row.notes || "").trim() || null,
       },
     });
+  }
+
+  console.log("Seeding outcome assignments...");
+  for (const { outcomeId, email } of outcomeAssignments) {
+    const user = userByEmail.get(email);
+    if (user) {
+      await prisma.outcomeAssignment.create({
+        data: { outcomeId, userId: user.id },
+      }).catch(() => {});
+    }
   }
 
   // --- Seed milestones from the focus area sheets ---

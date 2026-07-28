@@ -24,11 +24,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await prisma.outcome.updateMany({
-      where: { responsibleUserId: userId },
-      data: { responsibleUserId: null },
-    });
-
     await prisma.user.delete({ where: { id: userId } });
 
     return NextResponse.json({ message: "User deleted" });

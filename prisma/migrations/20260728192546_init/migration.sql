@@ -5,6 +5,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'viewer',
+    "mustChangePassword" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -25,7 +26,6 @@ CREATE TABLE "Outcome" (
     "startingPoint" TEXT,
     "department" TEXT,
     "reportedToOpex" TEXT,
-    "responsibleUserId" INTEGER,
     "riskLevel" TEXT,
     "riskIfNot" TEXT,
     "targetDate" TEXT,
@@ -36,8 +36,18 @@ CREATE TABLE "Outcome" (
     "reasonForDelay" TEXT,
     "completePct" REAL NOT NULL DEFAULT 0,
     "notes" TEXT,
-    CONSTRAINT "Outcome_focusAreaId_fkey" FOREIGN KEY ("focusAreaId") REFERENCES "FocusArea" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Outcome_responsibleUserId_fkey" FOREIGN KEY ("responsibleUserId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "archived" BOOLEAN NOT NULL DEFAULT false,
+    CONSTRAINT "Outcome_focusAreaId_fkey" FOREIGN KEY ("focusAreaId") REFERENCES "FocusArea" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "OutcomeAssignment" (
+    "outcomeId" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+
+    PRIMARY KEY ("outcomeId", "userId"),
+    CONSTRAINT "OutcomeAssignment_outcomeId_fkey" FOREIGN KEY ("outcomeId") REFERENCES "Outcome" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "OutcomeAssignment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -47,6 +57,15 @@ CREATE TABLE "Milestone" (
     "description" TEXT NOT NULL,
     "targetDate" TEXT,
     CONSTRAINT "Milestone_outcomeId_fkey" FOREIGN KEY ("outcomeId") REFERENCES "Outcome" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "PasswordResetToken" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "email" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiresAt" DATETIME NOT NULL,
+    "used" BOOLEAN NOT NULL DEFAULT false
 );
 
 -- CreateTable
@@ -66,3 +85,6 @@ CREATE TABLE "OpexReview" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken"("token");

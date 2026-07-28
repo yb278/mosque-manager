@@ -28,7 +28,7 @@ model User {
   role               Role       @default(viewer)
   mustChangePassword Boolean    @default(true)
   createdAt          DateTime   @default(now())
-  outcomes           Outcome[]
+  assignments        OutcomeAssignment[]
 }
 
 model FocusArea {
@@ -39,29 +39,37 @@ model FocusArea {
 }
 
 model Outcome {
-  id               String   @id
-  focusAreaId      String
-  focusArea        FocusArea @relation(fields: [focusAreaId], references: [id])
-  isValid          Boolean  @default(true)
-  title            String
-  benefit          String?
-  startingPoint    String?
-  department       String?
-  reportedToOpex   String?
-  responsibleUserId Int?
-  responsibleUser  User?    @relation(fields: [responsibleUserId], references: [id])
-  riskLevel        String?
-  riskIfNot        String?
-  targetDate       String?
-  desiredOutcome   String?
-  milestoneCount   Int?
-  actions          String?
-  status           Status   @default(not_started)
-  reasonForDelay   String?
-  completePct      Float    @default(0)
-  notes            String?
-  archived         Boolean  @default(false)
-  milestones       Milestone[]
+  id              String   @id
+  focusAreaId     String
+  focusArea       FocusArea @relation(fields: [focusAreaId], references: [id])
+  isValid         Boolean  @default(true)
+  title           String
+  benefit         String?
+  startingPoint   String?
+  department      String?
+  reportedToOpex  String?
+  riskLevel       String?
+  riskIfNot       String?
+  targetDate      String?
+  desiredOutcome  String?
+  milestoneCount  Int?
+  actions         String?
+  status          Status   @default(not_started)
+  reasonForDelay  String?
+  completePct     Float    @default(0)
+  notes           String?
+  archived        Boolean  @default(false)
+  milestones      Milestone[]
+  assignments     OutcomeAssignment[]
+}
+
+model OutcomeAssignment {
+  outcomeId String
+  outcome   Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([outcomeId, userId])
 }
 
 model Milestone {

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { focusAreaId, title, department, responsibleUserId, riskLevel, targetDate, benefit, startingPoint, desiredOutcome, actions, notes } = body;
+    const { focusAreaId, title, department, userIds, riskLevel, targetDate, benefit, startingPoint, desiredOutcome, actions, notes } = body;
 
     if (!focusAreaId || !title) {
       return NextResponse.json({ error: "Focus area and title required" }, { status: 400 });
@@ -31,7 +31,6 @@ export async function POST(req: Request) {
         focusAreaId,
         title,
         department: department || null,
-        responsibleUserId: responsibleUserId ? Number(responsibleUserId) : null,
         riskLevel: riskLevel || null,
         targetDate: targetDate || null,
         benefit: benefit || null,
@@ -39,6 +38,9 @@ export async function POST(req: Request) {
         desiredOutcome: desiredOutcome || null,
         actions: actions || null,
         notes: notes || null,
+        assignments: userIds?.length ? {
+          create: userIds.map((uid: number) => ({ userId: uid })),
+        } : undefined,
       },
     });
 
