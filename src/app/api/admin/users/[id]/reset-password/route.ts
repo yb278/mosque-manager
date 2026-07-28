@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
+import { randomBytes } from "crypto";
+import { sendPasswordEmail } from "@/lib/email";
 
 export async function POST(
   _req: Request,
@@ -21,15 +23,17 @@ export async function POST(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const defaultPassword = user.role === "admin" ? "admin123" : "changeme123";
-    const passwordHash = await hash(defaultPassword, 12);
+    const rawPassword = randomBytes(6).toString("hex");
+    const passwordHash = await hash(rawPassword, 12);
 
     await prisma.user.update({
       where: { id: userId },
       data: { passwordHash, mustChangePassword: true },
     });
 
-    return NextResponse.json({ message: "Password reset", defaultPassword });
+    await sendPasswordEmail(user.email, user.name, rawPassword);
+
+    return NextResponse.json({ message: "Password reset email sent" });
   } catch (error) {
     console.error("Error resetting password:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

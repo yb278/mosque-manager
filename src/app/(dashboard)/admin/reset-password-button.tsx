@@ -9,7 +9,7 @@ export default function ResetPasswordButton({ userId, userName }: { userId: numb
   const [done, setDone] = useState(false);
 
   async function handleReset() {
-    if (!confirm(`Reset password for "${userName}" to the default? They will need to change it on next login.`)) return;
+    if (!confirm(`Send a new password to "${userName}"? They will need to change it on next login.`)) return;
     setLoading(true);
     const res = await fetch(`/api/admin/users/${userId}/reset-password`, { method: "POST" });
     if (res.ok) {
@@ -20,7 +20,7 @@ export default function ResetPasswordButton({ userId, userName }: { userId: numb
   }
 
   if (done) {
-    return <span className="text-xs text-primary">Reset!</span>;
+    return <span className="text-xs text-primary">Emailed!</span>;
   }
 
   return (
