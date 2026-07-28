@@ -2,6 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 
+const STATUS_COLORS: Record<string, string> = {
+  complete: "bg-green-100 text-green-700",
+  in_progress: "bg-amber-100 text-amber-700",
+  delayed: "bg-red-100 text-red-700",
+  not_started: "bg-zinc-100 text-zinc-500",
+};
+
+function pctColor(pct: number): string {
+  return pct >= 70 ? "#16a34a" : pct >= 30 ? "#ca8a04" : "#dc2626";
+}
+
 export default async function OutcomesPage({
   searchParams,
 }: {
@@ -104,85 +115,66 @@ export default async function OutcomesPage({
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+      <div className="hidden md:block bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-zinc-50 border-b border-zinc-200">
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">
-                ID
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">
-                Outcome
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">
-                Focus Area
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">
-                Owner
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">
-                Status
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">
-                %
-              </th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">ID</th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">Outcome</th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">Focus Area</th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">Owner</th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">Status</th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">%</th>
             </tr>
           </thead>
           <tbody>
             {outcomes.map((o) => (
-              <tr
-                key={o.id}
-                className="border-b border-zinc-100 hover:bg-zinc-50"
-              >
-                <td className="py-3 px-4 text-zinc-400 font-mono text-xs">
-                  {o.id}
-                </td>
+              <tr key={o.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                <td className="py-3 px-4 text-zinc-400 font-mono text-xs">{o.id}</td>
                 <td className="py-3 px-4">
-                  <Link
-                    href={`/outcomes/${o.id}`}
-                    className="font-medium text-primary hover:text-primary"
-                  >
-                    {o.title}
-                  </Link>
+                  <Link href={`/outcomes/${o.id}`} className="font-medium text-primary hover:text-primary">{o.title}</Link>
                 </td>
-                <td className="py-3 px-4 text-zinc-500 text-xs">
-                  {o.focusArea.name}
-                </td>
-                <td className="py-3 px-4 text-zinc-600 text-xs">
-                  {o.responsibleUser?.name || "-"}
-                </td>
+                <td className="py-3 px-4 text-zinc-500 text-xs">{o.focusArea.name}</td>
+                <td className="py-3 px-4 text-zinc-600 text-xs">{o.responsibleUser?.name || "-"}</td>
                 <td className="py-3 px-4">
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      o.status === "complete"
-                        ? "bg-green-100 text-green-700"
-                        : o.status === "in_progress"
-                          ? "bg-amber-100 text-amber-700"
-                          : o.status === "delayed"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-zinc-100 text-zinc-500"
-                    }`}
-                  >
-                    {o.status.replace("_", " ")}
-                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[o.status]}`}>{o.status.replace("_", " ")}</span>
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
                     <div className="w-16 bg-zinc-200 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full"
-                        style={{ width: `${Math.round(o.completePct * 100)}%`, backgroundColor: Math.round(o.completePct * 100) >= 70 ? "#16a34a" : Math.round(o.completePct * 100) >= 30 ? "#ca8a04" : "#dc2626" }}
-                      />
+                      <div className="h-2 rounded-full" style={{ width: `${Math.round(o.completePct * 100)}%`, backgroundColor: pctColor(Math.round(o.completePct * 100)) }} />
                     </div>
-                    <span className="text-xs" style={{ color: Math.round(o.completePct * 100) >= 70 ? "#16a34a" : Math.round(o.completePct * 100) >= 30 ? "#ca8a04" : "#dc2626" }}>
-                      {Math.round(o.completePct * 100)}%
-                    </span>
+                    <span className="text-xs" style={{ color: pctColor(Math.round(o.completePct * 100)) }}>{Math.round(o.completePct * 100)}%</span>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="block md:hidden space-y-3">
+        {outcomes.map((o) => (
+          <Link key={o.id} href={`/outcomes/${o.id}`} className="block bg-white rounded-xl shadow-sm border border-zinc-200 p-4 hover:border-primary transition-colors">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm text-zinc-900 truncate">{o.title}</p>
+                <p className="text-xs text-zinc-400 font-mono mt-0.5">{o.id}</p>
+              </div>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ml-2 shrink-0 ${STATUS_COLORS[o.status]}`}>{o.status.replace("_", " ")}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+              <span>{o.focusArea.name}</span>
+              <span>{o.responsibleUser?.name || "Unassigned"}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-zinc-200 rounded-full h-2">
+                <div className="h-2 rounded-full" style={{ width: `${Math.round(o.completePct * 100)}%`, backgroundColor: pctColor(Math.round(o.completePct * 100)) }} />
+              </div>
+              <span className="text-xs font-medium" style={{ color: pctColor(Math.round(o.completePct * 100)) }}>{Math.round(o.completePct * 100)}%</span>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

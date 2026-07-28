@@ -1,16 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import Link from "next/link";
 import OutcomeEditor from "./outcome-editor";
 import DeleteButton from "./delete-button";
 import ArchiveButton from "./archive-button";
+import OutcomeAdminEditor from "./outcome-admin-editor";
 
 export default async function OutcomePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ edit?: string }>;
 }) {
   const { id } = await params;
+  const { edit } = await searchParams;
   const session = await auth();
   if (!session?.user) redirect("/login");
 
@@ -29,6 +34,36 @@ export default async function OutcomePage({
   const isAdmin = session.user.role === "admin";
   const isOwner = outcome.responsibleUserId === userId;
   const canEdit = isAdmin || isOwner;
+  const showEditMode = edit === "true" && isAdmin;
+
+  if (showEditMode) {
+    const users = await prisma.user.findMany({ orderBy: { name: "asc" } });
+    return (
+      <div className="max-w-3xl">
+        <div className="mb-6">
+          <Link href={`/outcomes/${id}`} className="text-sm text-zinc-500 hover:text-primary">&larr; Back</Link>
+          <h1 className="text-2xl font-bold mt-1">Edit Outcome</h1>
+        </div>
+        <OutcomeAdminEditor
+          outcome={{
+            id: outcome.id,
+            title: outcome.title,
+            benefit: outcome.benefit,
+            startingPoint: outcome.startingPoint,
+            desiredOutcome: outcome.desiredOutcome,
+            department: outcome.department,
+            riskLevel: outcome.riskLevel,
+            riskIfNot: outcome.riskIfNot,
+            targetDate: outcome.targetDate,
+            actions: outcome.actions,
+            responsibleUserId: outcome.responsibleUserId,
+            milestones: outcome.milestones,
+          }}
+          users={users.map((u) => ({ id: u.id, name: u.name, email: u.email }))}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl">
@@ -43,6 +78,11 @@ export default async function OutcomePage({
         </div>
         <div className="flex gap-2">
           {isAdmin && (
+            <Link href={`/outcomes/${outcome.id}?edit=true`} className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-primary-dark transition-colors">
+              Edit
+            </Link>
+          )}
+          {isAdmin && (
             <ArchiveButton outcomeId={outcome.id} archived={outcome.archived} />
           )}
           {isAdmin && <DeleteButton outcomeId={outcome.id} />}
@@ -52,7 +92,7 @@ export default async function OutcomePage({
       <div className="space-y-4">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
           <h2 className="font-semibold mb-3">Details</h2>
-          <dl className="grid grid-cols-2 gap-4 text-sm">
+          <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <dt className="text-zinc-500">Benefit</dt>
               <dd>{outcome.benefit || "-"}</dd>

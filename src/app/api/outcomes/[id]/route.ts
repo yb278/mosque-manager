@@ -6,6 +6,9 @@ async function getSession() {
   return auth();
 }
 
+const PROGRESS_FIELDS = ["status", "completePct", "notes", "reasonForDelay"] as const;
+const ADMIN_FIELDS = ["title", "benefit", "startingPoint", "desiredOutcome", "department", "riskLevel", "riskIfNot", "targetDate", "responsibleUserId", "actions", "archived"] as const;
+
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -18,7 +21,10 @@ export async function PATCH(
   const { id } = await params;
   const body = await req.json();
 
-  const outcome = await prisma.outcome.findUnique({ where: { id } });
+  const outcome = await prisma.outcome.findUnique({
+    where: { id },
+    include: { milestones: true },
+  });
   if (!outcome) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -31,23 +37,44 @@ export async function PATCH(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const data: Record<string, unknown> = {
-    status: body.status ?? outcome.status,
-    completePct: body.completePct ?? outcome.completePct,
-    notes: body.notes ?? outcome.notes,
-    reasonForDelay: body.reasonForDelay ?? outcome.reasonForDelay,
-  };
+  const data: Record<string, unknown> = {};
 
-  if (body.archived !== undefined) {
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Only admins can archive" }, { status: 403 });
+  if (isOwner) {
+    for (const field of PROGRESS_FIELDS) {
+      if (body[field] !== undefined) data[field] = body[field];
     }
-    data.archived = body.archived;
   }
 
-  const updated = await prisma.outcome.update({ where: { id }, data });
+  if (isAdmin) {
+    for (const field of ADMIN_FIELDS) {
+      if (body[field] !== undefined) data[field] = body[field];
+    }
+    for (const field of PROGRESS_FIELDS) {
+      if (body[field] !== undefined) data[field] = body[field];
+    }
+    if (body.archived !== undefined) data.archived = body.archived;
+  }
 
-  return NextResponse.json(updated);
+  const result = await prisma.$transaction(async (tx) => {
+    const updated = await tx.outcome.update({ where: { id }, data });
+
+    if (isAdmin && body.milestones !== undefined) {
+      await tx.milestone.deleteMany({ where: { outcomeId: id } });
+      if (body.milestones.length > 0) {
+        await tx.milestone.createMany({
+          data: body.milestones.map((m: { description: string; targetDate?: string }) => ({
+            outcomeId: id,
+            description: m.description,
+            targetDate: m.targetDate || null,
+          })),
+        });
+      }
+    }
+
+    return updated;
+  });
+
+  return NextResponse.json(result);
 }
 
 export async function DELETE(
