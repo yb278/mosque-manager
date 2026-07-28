@@ -30,7 +30,12 @@ export default function EditUserButton({
       body: JSON.stringify({ email: email.trim(), name: name.trim() || undefined }),
     });
     if (res.ok) {
-      setDone(true);
+      const data = await res.json();
+      if (data.message?.includes("emailed")) {
+        setDone(true);
+      } else {
+        setOpen(false);
+      }
       router.refresh();
     } else {
       const data = await res.json();
