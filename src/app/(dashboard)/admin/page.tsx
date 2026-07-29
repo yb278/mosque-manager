@@ -7,12 +7,14 @@ import RoleToggle from "./role-toggle";
 import ResetPasswordButton from "./reset-password-button";
 import DeleteUserButton from "./delete-user-button";
 import EditUserButton from "./edit-user-button";
+import EditFocusArea from "./edit-focus-area";
 
 export default async function AdminPage() {
   const session = await auth();
   if (session?.user?.role !== "admin") redirect("/dashboard");
 
   const users = await prisma.user.findMany({ orderBy: { createdAt: "desc" } });
+  const focusAreas = await prisma.focusArea.findMany({ orderBy: { id: "asc" } });
   const stats = {
     users: users.length,
     outcomes: await prisma.outcome.count(),
@@ -43,6 +45,16 @@ export default async function AdminPage() {
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">OPEX Reviews</p>
           <p className="text-3xl font-bold">{stats.reviews}</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
+        <h2 className="font-semibold mb-4">Focus Areas ({focusAreas.length})</h2>
+        <p className="text-xs text-zinc-400 mb-3">Edit focus area name and SLT lead.</p>
+        <div>
+          {focusAreas.map((fa) => (
+            <EditFocusArea key={fa.id} focusArea={fa} />
+          ))}
         </div>
       </div>
 
