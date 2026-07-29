@@ -135,7 +135,7 @@ export default async function OutcomePage({
           </p>
         </div>
 
-        {outcome.milestones.length > 0 && (
+        {!canEdit && outcome.milestones.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
             <h2 className="font-semibold mb-3">
               Milestones ({outcome.milestones.length})
@@ -179,6 +179,7 @@ export default async function OutcomePage({
               currentPct={outcome.completePct}
               currentNotes={outcome.notes || ""}
               currentReason={outcome.reasonForDelay || ""}
+              currentMilestones={outcome.milestones}
             />
           </div>
         )}

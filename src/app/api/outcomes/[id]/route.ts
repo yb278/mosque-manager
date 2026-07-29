@@ -58,7 +58,7 @@ export async function PATCH(
   const result = await prisma.$transaction(async (tx) => {
     const updated = await tx.outcome.update({ where: { id }, data });
 
-    if (isAdmin && body.milestones !== undefined) {
+    if ((isAdmin || isAssigned) && body.milestones !== undefined) {
       await tx.milestone.deleteMany({ where: { outcomeId: id } });
       if (body.milestones.length > 0) {
         await tx.milestone.createMany({

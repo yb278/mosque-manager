@@ -9,8 +9,11 @@ const STATUS_COLORS: Record<string, string> = {
   not_started: "bg-zinc-100 text-zinc-500",
 };
 
-function pctColor(pct: number): string {
-  return pct >= 70 ? "#16a34a" : pct >= 30 ? "#ca8a04" : "#dc2626";
+function pctVal(n: number): number {
+  return Math.ceil(n * 100);
+}
+function pctColor(v: number): string {
+  return v >= 70 ? "#16a34a" : v >= 30 ? "#ca8a04" : "#dc2626";
 }
 
 export default async function OutcomesPage({
@@ -142,9 +145,9 @@ export default async function OutcomesPage({
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
                     <div className="w-16 bg-zinc-200 rounded-full h-2">
-                      <div className="h-2 rounded-full" style={{ width: `${Math.round(o.completePct * 100)}%`, backgroundColor: pctColor(Math.round(o.completePct * 100)) }} />
+                      <div className="h-2 rounded-full" style={{ width: `${pctVal(o.completePct)}%`, backgroundColor: pctColor(pctVal(o.completePct)) }} />
                     </div>
-                    <span className="text-xs" style={{ color: pctColor(Math.round(o.completePct * 100)) }}>{Math.round(o.completePct * 100)}%</span>
+                    <span className="text-xs" style={{ color: pctColor(pctVal(o.completePct)) }}>{pctVal(o.completePct)}%</span>
                   </div>
                 </td>
               </tr>
@@ -169,9 +172,9 @@ export default async function OutcomesPage({
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-zinc-200 rounded-full h-2">
-                <div className="h-2 rounded-full" style={{ width: `${Math.round(o.completePct * 100)}%`, backgroundColor: pctColor(Math.round(o.completePct * 100)) }} />
+                <div className="h-2 rounded-full" style={{ width: `${pctVal(o.completePct)}%`, backgroundColor: pctColor(pctVal(o.completePct)) }} />
               </div>
-              <span className="text-xs font-medium" style={{ color: pctColor(Math.round(o.completePct * 100)) }}>{Math.round(o.completePct * 100)}%</span>
+              <span className="text-xs font-medium" style={{ color: pctColor(pctVal(o.completePct)) }}>{pctVal(o.completePct)}%</span>
             </div>
           </Link>
         ))}

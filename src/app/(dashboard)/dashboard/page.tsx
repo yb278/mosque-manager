@@ -2,8 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { StackedAreaChart, DepartmentPie, LeadBarChart } from "@/components/strategy-charts";
 
+function pct(n: number) {
+  return Math.ceil(n * 100);
+}
+
+function pctColor(v: number) {
+  return v >= 70 ? "#16a34a" : v >= 30 ? "#ca8a04" : "#dc2626";
+}
+
 async function getStats() {
   const outcomes = await prisma.outcome.findMany({
+    where: { archived: false },
     include: { focusArea: true, assignments: { include: { user: true } } },
   });
 
@@ -22,7 +31,7 @@ async function getStats() {
       complete: areaOutcomes.filter((o) => o.status === "complete").length,
       delayed: areaOutcomes.filter((o) => o.status === "delayed").length,
     };
-    return { ...fa, total, avgPct: Math.round(avgPct * 100), byStatus };
+    return { ...fa, total, avgPct: pct(avgPct), byStatus };
   });
 
   const byDepartment = Object.entries(
@@ -67,6 +76,7 @@ export default async function DashboardPage() {
     totalOutcomes > 0
       ? data.outcomes.reduce((sum, o) => sum + o.completePct, 0) / totalOutcomes
       : 0;
+  const ov = pct(overallAvg);
 
   return (
     <div className="space-y-6">
@@ -94,9 +104,7 @@ export default async function DashboardPage() {
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Overall Progress</p>
-          <p className="text-3xl font-bold" style={{ color: Math.round(overallAvg * 100) >= 70 ? "#16a34a" : Math.round(overallAvg * 100) >= 30 ? "#ca8a04" : "#dc2626" }}>
-            {Math.round(overallAvg * 100)}%
-          </p>
+          <p className="text-3xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</p>
         </div>
       </div>
 
@@ -114,13 +122,10 @@ export default async function DashboardPage() {
             <div key={area.id}>
               <div className="flex justify-between text-sm mb-1">
                 <span className="font-medium">{area.name}</span>
-                <span className="font-bold" style={{ color: area.avgPct >= 70 ? "#16a34a" : area.avgPct >= 30 ? "#ca8a04" : "#dc2626" }}>{area.avgPct}%</span>
+                <span className="font-bold" style={{ color: pctColor(area.avgPct) }}>{area.avgPct}%</span>
               </div>
               <div className="bg-zinc-200 rounded-full h-3">
-                <div
-                  className="h-3 rounded-full transition-all"
-                  style={{ width: `${area.avgPct}%`, backgroundColor: area.avgPct >= 70 ? "#16a34a" : area.avgPct >= 30 ? "#ca8a04" : "#dc2626" }}
-                />
+                <div className="h-3 rounded-full transition-all" style={{ width: `${area.avgPct}%`, backgroundColor: pctColor(area.avgPct) }} />
               </div>
               <div className="flex gap-3 mt-1 text-xs text-zinc-500">
                 <span className="text-green-600">{area.byStatus.complete} done</span>

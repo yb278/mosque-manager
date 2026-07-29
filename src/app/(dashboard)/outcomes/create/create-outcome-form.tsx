@@ -95,7 +95,7 @@ export default function CreateOutcomeForm({
         </div>
         <div>
           <label className="block text-sm font-medium text-zinc-700 mb-1">Target Date</label>
-          <input name="targetDate" type="text" className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Q1 2026" />
+          <input name="targetDate" type="date" className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
         </div>
       </div>
 

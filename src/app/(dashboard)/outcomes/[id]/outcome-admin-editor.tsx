@@ -123,7 +123,7 @@ export default function OutcomeAdminEditor({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">Target Date</label>
-              <input name="targetDate" defaultValue={outcome.targetDate || ""} className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              <input name="targetDate" type="date" defaultValue={outcome.targetDate || ""} className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">Owner(s)</label>

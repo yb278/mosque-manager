@@ -1,8 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import { OverallPie, AreaBarChart, FocusAreaPies } from "@/components/dashboard-charts";
 
+function pct(n: number) {
+  return Math.ceil(n * 100);
+}
+
+function pctColor(v: number) {
+  return v >= 70 ? "#16a34a" : v >= 30 ? "#ca8a04" : "#dc2626";
+}
+
 async function getData() {
-  const outcomes = await prisma.outcome.findMany({ include: { focusArea: true } });
+  const outcomes = await prisma.outcome.findMany({
+    where: { archived: false },
+    include: { focusArea: true },
+  });
   const focusAreas = await prisma.focusArea.findMany();
 
   const areaStats = focusAreas.map((fa) => {
@@ -10,7 +21,7 @@ async function getData() {
     const total = areaOutcomes.length;
     const complete = areaOutcomes.filter((o) => o.status === "complete").length;
     const avgPct = total > 0 ? areaOutcomes.reduce((sum, o) => sum + o.completePct, 0) / total : 0;
-    return { name: fa.name, sltLead: fa.sltLead, totalOutcomes: total, completeOutcomes: complete, avgCompletePct: Math.round(avgPct * 100) };
+    return { name: fa.name, sltLead: fa.sltLead, totalOutcomes: total, completeOutcomes: complete, avgCompletePct: pct(avgPct) };
   });
 
   const totalOutcomes = outcomes.length;
@@ -37,6 +48,7 @@ async function getData() {
 
 export default async function OverviewPage() {
   const data = await getData();
+  const ov = pct(data.overallAvg);
 
   return (
     <div className="space-y-6">
@@ -57,16 +69,16 @@ export default async function OverviewPage() {
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Overall Progress</p>
-          <p className="text-3xl font-bold mt-1" style={{ color: Math.round(data.overallAvg * 100) >= 70 ? "#16a34a" : Math.round(data.overallAvg * 100) >= 30 ? "#ca8a04" : "#dc2626" }}>{Math.round(data.overallAvg * 100)}%</p>
+          <p className="text-3xl font-bold mt-1" style={{ color: pctColor(ov) }}>{ov}%</p>
         </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
         <div className="flex items-center gap-4">
           <div className="flex-1 bg-zinc-200 rounded-full h-5">
-            <div className="h-5 rounded-full transition-all" style={{ width: `${Math.round(data.overallAvg * 100)}%`, backgroundColor: Math.round(data.overallAvg * 100) >= 70 ? "#16a34a" : Math.round(data.overallAvg * 100) >= 30 ? "#ca8a04" : "#dc2626" }} />
+            <div className="h-5 rounded-full transition-all" style={{ width: `${ov}%`, backgroundColor: pctColor(ov) }} />
           </div>
-          <span className="text-2xl font-bold" style={{ color: Math.round(data.overallAvg * 100) >= 70 ? "#16a34a" : Math.round(data.overallAvg * 100) >= 30 ? "#ca8a04" : "#dc2626" }}>{Math.round(data.overallAvg * 100)}%</span>
+          <span className="text-2xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</span>
         </div>
         <p className="text-sm text-zinc-500 mt-2">{data.totalComplete} of {data.totalOutcomes} outcomes completed</p>
       </div>
@@ -85,9 +97,9 @@ export default async function OverviewPage() {
             <p className="text-xs text-zinc-500 mb-3">Lead: {area.sltLead}</p>
             <div className="flex items-center gap-3 mb-2">
               <div className="flex-1 bg-zinc-200 rounded-full h-3">
-                <div className="h-3 rounded-full transition-all" style={{ width: `${area.avgCompletePct}%`, backgroundColor: area.avgCompletePct >= 70 ? "#16a34a" : area.avgCompletePct >= 30 ? "#ca8a04" : "#dc2626" }} />
+                <div className="h-3 rounded-full transition-all" style={{ width: `${area.avgCompletePct}%`, backgroundColor: pctColor(area.avgCompletePct) }} />
               </div>
-              <span className="text-lg font-bold" style={{ color: area.avgCompletePct >= 70 ? "#16a34a" : area.avgCompletePct >= 30 ? "#ca8a04" : "#dc2626" }}>{area.avgCompletePct}%</span>
+              <span className="text-lg font-bold" style={{ color: pctColor(area.avgCompletePct) }}>{area.avgCompletePct}%</span>
             </div>
             <div className="flex justify-between text-xs text-zinc-500">
               <span>{area.completeOutcomes} complete</span>
