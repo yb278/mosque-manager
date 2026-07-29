@@ -149,9 +149,9 @@ export default function OutcomeEditor({
                   className="flex-1 px-2 py-1.5 border border-zinc-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <input
-                  type="date"
                   value={m.targetDate}
                   onChange={(e) => updateMilestone(i, "targetDate", e.target.value)}
+                  placeholder="e.g. Q1 2026"
                   className="w-40 px-2 py-1.5 border border-zinc-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <button type="button" onClick={() => removeMilestone(i)} className="text-red-500 hover:text-red-700 text-sm px-1">
