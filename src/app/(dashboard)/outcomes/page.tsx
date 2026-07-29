@@ -46,18 +46,18 @@ export default async function OutcomesPage({
 
   const isMyTasks = params.my === "true";
 
-  function pctSortHref(next: "asc" | "desc" | undefined) {
+  function pctSortHref(next: "asc" | "desc") {
     const sp = new URLSearchParams();
     if (params.focusArea) sp.set("focusArea", params.focusArea);
     if (params.status) sp.set("status", params.status);
     if (params.my === "true") sp.set("my", "true");
     if (params.archived === "true") sp.set("archived", "true");
-    if (next) sp.set("sortPct", next);
+    sp.set("sortPct", next);
     const qs = sp.toString();
-    return `/outcomes${qs ? `?${qs}` : ""}`;
+    return `/outcomes?${qs}`;
   }
 
-  const nextSort = !sortPct ? "desc" : sortPct === "desc" ? "asc" : undefined;
+  const nextSort = sortPct === "asc" ? "desc" : "asc";
 
   return (
     <div className="space-y-6">
@@ -150,6 +150,7 @@ export default async function OutcomesPage({
                   %
                   {sortPct === "desc" && <span className="text-xs">▼</span>}
                   {sortPct === "asc" && <span className="text-xs">▲</span>}
+                  {!sortPct && <span className="text-xs text-zinc-300">▼</span>}
                 </Link>
               </th>
             </tr>
