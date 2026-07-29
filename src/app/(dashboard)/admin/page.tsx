@@ -49,16 +49,6 @@ export default async function AdminPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
-        <h2 className="font-semibold mb-4">Focus Areas ({focusAreas.length})</h2>
-        <p className="text-xs text-zinc-400 mb-3">Edit focus area name and SLT lead.</p>
-        <div>
-          {focusAreas.map((fa) => (
-            <EditFocusArea key={fa.id} focusArea={fa} />
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
         <h2 className="font-semibold mb-4">Create User</h2>
         <CreateUserForm />
       </div>
@@ -120,6 +110,16 @@ export default async function AdminPage() {
                 <DeleteUserButton userId={u.id} userName={u.name} />
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
+        <h2 className="font-semibold mb-4">Focus Areas ({focusAreas.length})</h2>
+        <p className="text-xs text-zinc-400 mb-3">Edit focus area name and SLT lead.</p>
+        <div>
+          {focusAreas.map((fa) => (
+            <EditFocusArea key={fa.id} focusArea={fa} />
           ))}
         </div>
       </div>
