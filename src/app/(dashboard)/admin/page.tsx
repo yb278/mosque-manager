@@ -13,7 +13,7 @@ export default async function AdminPage() {
   const session = await auth();
   if (session?.user?.role !== "admin") redirect("/dashboard");
 
-  const users = await prisma.user.findMany({ orderBy: { createdAt: "desc" } });
+  const users = await prisma.user.findMany({ orderBy: [{ role: "asc" }, { name: "asc" }] });
   const focusAreas = await prisma.focusArea.findMany({ orderBy: { id: "asc" } });
   const stats = {
     users: users.length,
