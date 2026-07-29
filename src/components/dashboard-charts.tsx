@@ -74,6 +74,7 @@ export function FocusAreaPies({ data }: { data: { name: string; statuses: { name
                     <Cell key={s.name} fill={STATUS_COLORS[s.name as keyof typeof STATUS_COLORS]} />
                   ))}
                 </Pie>
+                <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </div>
