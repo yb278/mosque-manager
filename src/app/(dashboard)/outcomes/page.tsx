@@ -19,7 +19,7 @@ function pctColor(v: number): string {
 export default async function OutcomesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ focusArea?: string; status?: string; my?: string; archived?: string; sortPct?: string }>;
+  searchParams: Promise<{ focusArea?: string; status?: string; my?: string; archived?: string; sortBy?: string; sortDir?: string }>;
 }) {
   const session = await auth();
   const params = await searchParams;
@@ -33,31 +33,51 @@ export default async function OutcomesPage({
     where.assignments = { some: { userId: Number(session.user.id) } };
   }
 
-  const sortPct = params.sortPct as "asc" | "desc" | undefined;
-  const orderBy = sortPct
-    ? { completePct: sortPct }
-    : { id: "asc" as const };
-
-  const outcomes = await prisma.outcome.findMany({
-    where,
-    include: { focusArea: true, assignments: { include: { user: true } } },
-    orderBy,
-  });
-
   const isMyTasks = params.my === "true";
 
-  function pctSortHref(next: "asc" | "desc") {
+  const sortBy = params.sortBy;
+  const sortDir = (params.sortDir || "asc") as "asc" | "desc";
+
+  function dbOrderBy(): Record<string, "asc" | "desc"> {
+    if (sortBy === "pct") return { completePct: sortDir };
+    if (sortBy === "status") return { status: sortDir };
+    if (sortBy === "owner") return { id: "asc" as const };
+    return { id: sortBy === "id" ? sortDir : "asc" };
+  }
+
+  let outcomes = await prisma.outcome.findMany({
+    where,
+    include: { focusArea: true, assignments: { include: { user: true } } },
+    orderBy: dbOrderBy(),
+  });
+
+  if (sortBy === "owner") {
+    const ownerName = (o: typeof outcomes[number]) =>
+      o.assignments.map((a) => a.user.name).join(", ") || "";
+    outcomes.sort((a, b) => {
+      const cmp = ownerName(a).localeCompare(ownerName(b));
+      return sortDir === "desc" ? -cmp : cmp;
+    });
+  }
+
+  function sortHref(column: string) {
     const sp = new URLSearchParams();
     if (params.focusArea) sp.set("focusArea", params.focusArea);
     if (params.status) sp.set("status", params.status);
     if (params.my === "true") sp.set("my", "true");
     if (params.archived === "true") sp.set("archived", "true");
-    sp.set("sortPct", next);
-    const qs = sp.toString();
-    return `/outcomes?${qs}`;
+    const nextDir = sortBy === column && sortDir === "asc" ? "desc" : "asc";
+    sp.set("sortBy", column);
+    sp.set("sortDir", nextDir);
+    return `/outcomes?${sp.toString()}`;
   }
 
-  const nextSort = sortPct === "asc" ? "desc" : "asc";
+  function sortIcon(column: string) {
+    if (sortBy === column) {
+      return <span className="text-xs">{sortDir === "desc" ? "▼" : "▲"}</span>;
+    }
+    return <span className="text-xs text-zinc-300">▼</span>;
+  }
 
   return (
     <div className="space-y-6">
@@ -140,18 +160,19 @@ export default async function OutcomesPage({
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-zinc-50 border-b border-zinc-200">
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">ID</th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">
+                <Link href={sortHref("id")} className="inline-flex items-center gap-1 hover:text-zinc-800">ID {sortIcon("id")}</Link>
+              </th>
               <th className="text-left py-3 px-4 font-medium text-zinc-500">Outcome</th>
               <th className="text-left py-3 px-4 font-medium text-zinc-500">Focus Area</th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">Owner</th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">Status</th>
               <th className="text-left py-3 px-4 font-medium text-zinc-500">
-                <Link href={pctSortHref(nextSort)} className="inline-flex items-center gap-1 hover:text-zinc-800">
-                  %
-                  {sortPct === "desc" && <span className="text-xs">▼</span>}
-                  {sortPct === "asc" && <span className="text-xs">▲</span>}
-                  {!sortPct && <span className="text-xs text-zinc-300">▼</span>}
-                </Link>
+                <Link href={sortHref("owner")} className="inline-flex items-center gap-1 hover:text-zinc-800">Owner {sortIcon("owner")}</Link>
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">
+                <Link href={sortHref("status")} className="inline-flex items-center gap-1 hover:text-zinc-800">Status {sortIcon("status")}</Link>
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">
+                <Link href={sortHref("pct")} className="inline-flex items-center gap-1 hover:text-zinc-800">% {sortIcon("pct")}</Link>
               </th>
             </tr>
           </thead>
