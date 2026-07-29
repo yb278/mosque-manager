@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { signOut } from "next-auth/react";
 
 export default function DashboardHeader({ userName, role }: { userName: string; role: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function DashboardHeader({ userName, role }: { userName: string; 
         <div className="flex items-center gap-3 text-sm">
           <span className="hidden md:inline text-red-200">{userName}</span>
           <Link href="/settings" className="hidden md:inline text-white hover:text-red-200 transition-colors text-xs">Settings</Link>
-          <Link href="/api/auth/signout" className="hidden md:inline bg-white text-primary px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-primary-lighter transition-colors">Sign Out</Link>
+          <button onClick={() => signOut({ callbackUrl: "/login" })} className="hidden md:inline bg-white text-primary px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-primary-lighter transition-colors cursor-pointer">Sign Out</button>
           <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-white p-1" aria-label="Toggle menu">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {menuOpen ? (
@@ -53,7 +54,7 @@ export default function DashboardHeader({ userName, role }: { userName: string; 
             <div className="border-t border-red-700 mt-2 pt-2">
               <span className="block py-1 text-red-200">{userName}</span>
               <Link href="/settings" onClick={() => setMenuOpen(false)} className="block py-1 text-white hover:text-red-200 transition-colors">Settings</Link>
-              <Link href="/api/auth/signout" onClick={() => setMenuOpen(false)} className="block py-1 text-white hover:text-red-200 transition-colors">Sign Out</Link>
+              <button onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/login" }); }} className="block py-1 text-white hover:text-red-200 transition-colors cursor-pointer">Sign Out</button>
             </div>
           </nav>
         </div>
