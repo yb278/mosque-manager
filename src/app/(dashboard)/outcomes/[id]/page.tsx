@@ -6,6 +6,7 @@ import OutcomeEditor from "./outcome-editor";
 import DeleteButton from "./delete-button";
 import ArchiveButton from "./archive-button";
 import OutcomeAdminEditor from "./outcome-admin-editor";
+import { formatDate, toInputDate } from "@/lib/dates";
 
 export default async function OutcomePage({
   params,
@@ -108,7 +109,7 @@ export default async function OutcomePage({
             </div>
             <div>
               <dt className="text-zinc-500">Target Date</dt>
-              <dd>{outcome.targetDate || "-"}</dd>
+              <dd>{formatDate(outcome.targetDate)}</dd>
             </div>
             <div>
               <dt className="text-zinc-500">Owner(s)</dt>
@@ -148,7 +149,7 @@ export default async function OutcomePage({
                     <span>{m.description}</span>
                     {m.targetDate && (
                       <span className="text-zinc-400 ml-1 text-xs">
-                        ({m.targetDate})
+                        ({formatDate(m.targetDate)})
                       </span>
                     )}
                   </div>
