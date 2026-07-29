@@ -113,8 +113,8 @@ export default async function AdminPage() {
       </div>
 
       <div className="text-xs text-zinc-400">
-        <Link href="/" className="hover:text-primary">
-          ← Back to public dashboard
+        <Link href="/overview" className="hover:text-primary">
+          ← Back to overview
         </Link>
       </div>
     </div>
