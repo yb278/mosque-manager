@@ -71,7 +71,13 @@ async function getStats() {
 
   const totalMilestones = milestones.length;
 
-  return { outcomes, byArea, byDepartment, stackedData, deptPieData, leadData, totalMilestones };
+  const recentOutcomeIds = (await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM Outcome WHERE archived = 0 ORDER BY rowid DESC LIMIT 10
+  `).map(r => r.id);
+  const outcomeMap = new Map(outcomes.map((o) => [o.id, o]));
+  const recentOutcomes = recentOutcomeIds.map((id) => outcomeMap.get(id)).filter(Boolean) as typeof outcomes;
+
+  return { outcomes, recentOutcomes, byArea, byDepartment, stackedData, deptPieData, leadData, totalMilestones };
 }
 
 export default async function DashboardPage() {
@@ -154,7 +160,7 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
         <h2 className="text-lg font-semibold mb-4">Recent Outcomes</h2>
         <div className="space-y-2">
-          {data.outcomes.slice(0, 10).map((o) => (
+          {data.recentOutcomes.map((o) => (
             <div
               key={o.id}
               className="flex items-center justify-between py-2 border-b border-zinc-100 last:border-0"
