@@ -16,12 +16,18 @@ async function getData() {
   });
   const focusAreas = await prisma.focusArea.findMany();
 
+  const milestones = await prisma.milestone.findMany({
+    where: { outcome: { archived: false } },
+    include: { outcome: { select: { focusAreaId: true } } },
+  });
+
   const areaStats = focusAreas.map((fa) => {
     const areaOutcomes = outcomes.filter((o) => o.focusAreaId === fa.id);
     const total = areaOutcomes.length;
     const complete = areaOutcomes.filter((o) => o.status === "complete").length;
     const avgPct = total > 0 ? areaOutcomes.reduce((sum, o) => sum + o.completePct, 0) / total : 0;
-    return { name: fa.name, sltLead: fa.sltLead, totalOutcomes: total, completeOutcomes: complete, avgCompletePct: pct(avgPct) };
+    const milestoneCount = milestones.filter((m) => m.outcome.focusAreaId === fa.id).length;
+    return { name: fa.name, sltLead: fa.sltLead, totalOutcomes: total, completeOutcomes: complete, avgCompletePct: pct(avgPct), milestoneCount };
   });
 
   const totalOutcomes = outcomes.length;
@@ -43,7 +49,9 @@ async function getData() {
     return { name: fa.name, statuses: statuses.map((s) => ({ name: s, value: areaOutcomes.filter((o) => o.status === s).length })) };
   });
 
-  return { areaStats, statusCounts, barData, areaPieData, totalOutcomes, totalComplete, overallAvg };
+  const totalMilestones = milestones.length;
+
+  return { areaStats, statusCounts, barData, areaPieData, totalOutcomes, totalComplete, overallAvg, totalMilestones };
 }
 
 export default async function OverviewPage() {
@@ -54,10 +62,14 @@ export default async function OverviewPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Overview</h1>
 
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Outcomes</p>
           <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalOutcomes}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
+          <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Milestones</p>
+          <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalMilestones}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Completed</p>
@@ -103,7 +115,7 @@ export default async function OverviewPage() {
             </div>
             <div className="flex justify-between text-xs text-zinc-500">
               <span>{area.completeOutcomes} complete</span>
-              <span>{area.totalOutcomes} outcomes</span>
+              <span>{area.totalOutcomes} outcomes &middot; {area.milestoneCount} milestones</span>
             </div>
           </div>
         ))}

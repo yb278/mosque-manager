@@ -18,6 +18,11 @@ async function getStats() {
 
   const focusAreas = await prisma.focusArea.findMany();
 
+  const milestones = await prisma.milestone.findMany({
+    where: { outcome: { archived: false } },
+    include: { outcome: { select: { focusAreaId: true } } },
+  });
+
   const byArea = focusAreas.map((fa) => {
     const areaOutcomes = outcomes.filter((o) => o.focusAreaId === fa.id);
     const total = areaOutcomes.length;
@@ -31,7 +36,8 @@ async function getStats() {
       complete: areaOutcomes.filter((o) => o.status === "complete").length,
       delayed: areaOutcomes.filter((o) => o.status === "delayed").length,
     };
-    return { ...fa, total, avgPct: pct(avgPct), byStatus };
+    const milestoneCount = milestones.filter((m) => m.outcome.focusAreaId === fa.id).length;
+    return { ...fa, total, avgPct: pct(avgPct), byStatus, milestoneCount };
   });
 
   const byDepartment = Object.entries(
@@ -63,7 +69,9 @@ async function getStats() {
     .map(([name, outcomes]) => ({ name, outcomes }))
     .sort((a, b) => b.outcomes - a.outcomes);
 
-  return { outcomes, byArea, byDepartment, stackedData, deptPieData, leadData };
+  const totalMilestones = milestones.length;
+
+  return { outcomes, byArea, byDepartment, stackedData, deptPieData, leadData, totalMilestones };
 }
 
 export default async function DashboardPage() {
@@ -87,10 +95,14 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Total Outcomes</p>
           <p className="text-3xl font-bold text-zinc-900">{totalOutcomes}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
+          <p className="text-sm text-zinc-500">Total Milestones</p>
+          <p className="text-3xl font-bold text-zinc-900">{data.totalMilestones}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Completed</p>
@@ -132,7 +144,7 @@ export default async function DashboardPage() {
                 <span className="text-amber-600">{area.byStatus.in_progress} in prog</span>
                 <span className="text-red-600">{area.byStatus.delayed} delayed</span>
                 <span>{area.byStatus.not_started} not started</span>
-                <span className="ml-auto">{area.total} outcomes</span>
+                <span className="ml-auto">{area.total} outcomes &middot; {area.milestoneCount} milestones</span>
               </div>
             </div>
           ))}
