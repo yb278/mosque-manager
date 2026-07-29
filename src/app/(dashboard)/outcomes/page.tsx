@@ -19,7 +19,7 @@ function pctColor(v: number): string {
 export default async function OutcomesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ focusArea?: string; status?: string; my?: string; archived?: string }>;
+  searchParams: Promise<{ focusArea?: string; status?: string; my?: string; archived?: string; sortPct?: string }>;
 }) {
   const session = await auth();
   const params = await searchParams;
@@ -33,13 +33,31 @@ export default async function OutcomesPage({
     where.assignments = { some: { userId: Number(session.user.id) } };
   }
 
+  const sortPct = params.sortPct as "asc" | "desc" | undefined;
+  const orderBy = sortPct
+    ? { completePct: sortPct }
+    : { id: "asc" as const };
+
   const outcomes = await prisma.outcome.findMany({
     where,
     include: { focusArea: true, assignments: { include: { user: true } } },
-    orderBy: { id: "asc" },
+    orderBy,
   });
 
   const isMyTasks = params.my === "true";
+
+  function pctSortHref(next: "asc" | "desc" | undefined) {
+    const sp = new URLSearchParams();
+    if (params.focusArea) sp.set("focusArea", params.focusArea);
+    if (params.status) sp.set("status", params.status);
+    if (params.my === "true") sp.set("my", "true");
+    if (params.archived === "true") sp.set("archived", "true");
+    if (next) sp.set("sortPct", next);
+    const qs = sp.toString();
+    return `/outcomes${qs ? `?${qs}` : ""}`;
+  }
+
+  const nextSort = !sortPct ? "desc" : sortPct === "desc" ? "asc" : undefined;
 
   return (
     <div className="space-y-6">
@@ -127,7 +145,13 @@ export default async function OutcomesPage({
               <th className="text-left py-3 px-4 font-medium text-zinc-500">Focus Area</th>
               <th className="text-left py-3 px-4 font-medium text-zinc-500">Owner</th>
               <th className="text-left py-3 px-4 font-medium text-zinc-500">Status</th>
-              <th className="text-left py-3 px-4 font-medium text-zinc-500">%</th>
+              <th className="text-left py-3 px-4 font-medium text-zinc-500">
+                <Link href={pctSortHref(nextSort)} className="inline-flex items-center gap-1 hover:text-zinc-800">
+                  %
+                  {sortPct === "desc" && <span className="text-xs">▼</span>}
+                  {sortPct === "asc" && <span className="text-xs">▲</span>}
+                </Link>
+              </th>
             </tr>
           </thead>
           <tbody>
