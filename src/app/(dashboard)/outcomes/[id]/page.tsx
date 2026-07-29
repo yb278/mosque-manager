@@ -69,6 +69,9 @@ export default async function OutcomePage({
 
   return (
     <div className="max-w-3xl">
+      <div className="mb-4">
+        <Link href="/outcomes" className="text-sm text-zinc-500 hover:text-primary">&larr; Back to outcomes</Link>
+      </div>
       <div className="mb-6 flex items-start justify-between">
         <div>
           <p className="text-xs text-zinc-400 font-mono">{outcome.id}</p>
