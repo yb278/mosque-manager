@@ -99,7 +99,7 @@ export default function OutcomeEditor({
             name="completePct"
             min={0}
             max={100}
-            defaultValue={Math.ceil(currentPct * 100)}
+            defaultValue={Math.round(currentPct * 100)}
             className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

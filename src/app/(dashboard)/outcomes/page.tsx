@@ -10,7 +10,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function pctVal(n: number): number {
-  return Math.ceil(n * 100);
+  return Math.round(n * 100);
 }
 function pctColor(v: number): string {
   return v >= 70 ? "#16a34a" : v >= 30 ? "#ca8a04" : "#dc2626";

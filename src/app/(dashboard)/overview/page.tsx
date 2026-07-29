@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { OverallPie, AreaBarChart, FocusAreaPies } from "@/components/dashboard-charts";
 
 function pct(n: number) {
-  return Math.ceil(n * 100);
+  return Math.round(n * 100);
 }
 
 function pctColor(v: number) {

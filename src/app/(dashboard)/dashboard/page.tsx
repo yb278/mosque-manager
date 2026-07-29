@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { StackedAreaChart, DepartmentPie, LeadBarChart } from "@/components/strategy-charts";
 
 function pct(n: number) {
-  return Math.ceil(n * 100);
+  return Math.round(n * 100);
 }
 
 function pctColor(v: number) {
