@@ -72,11 +72,11 @@ export default async function OverviewPage() {
           <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalMilestones}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide">Completed</p>
+          <p className="text-xs text-zinc-500 uppercase tracking-wide">Outcomes Completed</p>
           <p className="text-3xl font-bold text-green-600 mt-1">{data.totalComplete}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide">In Progress</p>
+          <p className="text-xs text-zinc-500 uppercase tracking-wide">Outcomes In Progress</p>
           <p className="text-3xl font-bold text-blue-600 mt-1">{data.statusCounts.find(s => s.name === "in_progress")?.value || 0}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
@@ -92,7 +92,7 @@ export default async function OverviewPage() {
           </div>
           <span className="text-2xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</span>
         </div>
-        <p className="text-sm text-zinc-500 mt-2">{data.totalComplete} of {data.totalOutcomes} outcomes completed</p>
+        <p className="text-sm text-zinc-500 mt-2">{data.totalComplete}/{data.totalOutcomes} outcomes completed &middot; {ov}% overall</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

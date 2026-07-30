@@ -117,11 +117,11 @@ export default async function DashboardPage() {
           <p className="text-3xl font-bold text-zinc-900">{data.totalMilestones}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-sm text-zinc-500">Completed</p>
+          <p className="text-sm text-zinc-500">Outcomes Completed</p>
           <p className="text-3xl font-bold text-green-600">{totalComplete}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-sm text-zinc-500">In Progress</p>
+          <p className="text-sm text-zinc-500">Outcomes In Progress</p>
           <p className="text-3xl font-bold text-amber-600">
             {data.outcomes.filter((o) => o.status === "in_progress").length}
           </p>
