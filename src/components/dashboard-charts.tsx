@@ -50,7 +50,7 @@ export function AreaBarChart({ data }: { data: { name: string; pct: number }[] }
           <Tooltip formatter={(v) => `${v}%`} />
           <Bar dataKey="pct" radius={[0, 4, 4, 0]}>
             {data.map((d) => (
-              <Cell key={d.name} fill={d.pct >= 100 ? "#16a34a" : "#dc2626"} />
+              <Cell key={d.name} fill={`hsl(${Math.min(d.pct, 100) * 1.2}, 75%, 40%)`} />
             ))}
           </Bar>
         </BarChart>

@@ -6,7 +6,7 @@ function pct(n: number) {
 }
 
 function pctColor(v: number) {
-  return v >= 100 ? "#16a34a" : "#dc2626";
+  return `hsl(${Math.min(v, 100) * 1.2}, 75%, 40%)`;
 }
 
 async function getData() {
@@ -51,13 +51,7 @@ async function getData() {
 
   const totalMilestones = milestones.length;
 
-  const completedOutcomes = await prisma.outcome.findMany({
-    where: { archived: false, status: "complete" },
-    include: { focusArea: true },
-    orderBy: { id: "asc" },
-  });
-
-  return { areaStats, statusCounts, barData, areaPieData, totalOutcomes, totalComplete, overallAvg, totalMilestones, completedOutcomes };
+  return { areaStats, statusCounts, barData, areaPieData, totalOutcomes, totalComplete, overallAvg, totalMilestones };
 }
 
 export default async function OverviewPage() {
@@ -107,20 +101,6 @@ export default async function OverviewPage() {
       </div>
 
       <FocusAreaPies data={data.areaPieData} />
-
-      {data.completedOutcomes.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
-          <h2 className="text-lg font-semibold mb-4">Completed Outcomes ({data.completedOutcomes.length})</h2>
-          <div className="space-y-2">
-            {data.completedOutcomes.map((o) => (
-              <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-zinc-100 last:border-0">
-                <span className="text-sm">{o.title}</span>
-                <span className="text-xs text-zinc-400">{o.focusArea.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {data.areaStats.map((area) => (

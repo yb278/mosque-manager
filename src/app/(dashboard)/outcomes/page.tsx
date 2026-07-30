@@ -13,7 +13,7 @@ function pctVal(n: number): number {
   return Math.round(n * 100);
 }
 function pctColor(v: number): string {
-  return v >= 100 ? "#16a34a" : "#dc2626";
+  return `hsl(${Math.min(v, 100) * 1.2}, 75%, 40%)`;
 }
 
 export default async function OutcomesPage({

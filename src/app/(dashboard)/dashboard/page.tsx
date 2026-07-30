@@ -7,7 +7,7 @@ function pct(n: number) {
 }
 
 function pctColor(v: number) {
-  return v >= 100 ? "#16a34a" : "#dc2626";
+  return `hsl(${Math.min(v, 100) * 1.2}, 75%, 40%)`;
 }
 
 async function getStats() {
@@ -92,7 +92,6 @@ export default async function DashboardPage() {
 
   const totalOutcomes = data.outcomes.length;
   const totalComplete = data.outcomes.filter((o) => o.status === "complete").length;
-  const completedOutcomes = data.outcomes.filter((o) => o.status === "complete");
   const overallAvg =
     totalOutcomes > 0
       ? data.outcomes.reduce((sum, o) => sum + o.completePct, 0) / totalOutcomes
@@ -163,20 +162,6 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
-
-      {completedOutcomes.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
-          <h2 className="text-lg font-semibold mb-4">Completed Outcomes ({completedOutcomes.length})</h2>
-          <div className="space-y-2">
-            {completedOutcomes.map((o) => (
-              <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-zinc-100 last:border-0">
-                <span className="text-sm">{o.title}</span>
-                <span className="text-xs text-zinc-400">{o.focusArea.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
         <h2 className="text-lg font-semibold mb-4">Recent Outcomes</h2>
