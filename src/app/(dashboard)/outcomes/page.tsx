@@ -13,7 +13,9 @@ function pctVal(n: number): number {
   return Math.round(n * 100);
 }
 function pctColor(v: number): string {
-  return `hsl(${Math.min(v, 100) * 1.2}, 75%, 40%)`;
+  const pct = Math.min(v, 100);
+  const hue = pct <= 70 ? (pct / 70) * 60 : 60 + ((pct - 70) / 30) * 60;
+  return `hsl(${hue}, 75%, 40%)`;
 }
 
 export default async function OutcomesPage({

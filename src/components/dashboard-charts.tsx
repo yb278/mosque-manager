@@ -5,6 +5,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
 
+function barColor(pct: number) {
+  const p = Math.min(pct, 100);
+  const h = p <= 70 ? (p / 70) * 60 : 60 + ((p - 70) / 30) * 60;
+  return `hsl(${h}, 75%, 40%)`;
+}
+
 const STATUS_COLORS = {
   complete: "#16a34a",
   in_progress: "#2563eb",
@@ -50,7 +56,7 @@ export function AreaBarChart({ data }: { data: { name: string; pct: number }[] }
           <Tooltip formatter={(v) => `${v}%`} />
           <Bar dataKey="pct" radius={[0, 4, 4, 0]}>
             {data.map((d) => (
-              <Cell key={d.name} fill={`hsl(${Math.min(d.pct, 100) * 1.2}, 75%, 40%)`} />
+              <Cell key={d.name} fill={barColor(d.pct)} />
             ))}
           </Bar>
         </BarChart>
