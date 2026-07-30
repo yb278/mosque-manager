@@ -63,7 +63,7 @@ export function DepartmentPie({ data }: { data: { name: string; value: number }[
   );
 }
 
-export function LeadBarChart({ data }: { data: { name: string; outcomes: number }[] }) {
+export function LeadBarChart({ data }: { data: { name: string; outcomes: number; complete: number; in_progress: number; delayed: number; not_started: number }[] }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
       <h2 className="text-lg font-semibold mb-4">Outcomes per SLT Lead</h2>
@@ -72,7 +72,20 @@ export function LeadBarChart({ data }: { data: { name: string; outcomes: number 
           <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
           <XAxis type="category" dataKey="name" tick={{ fontSize: 12 }} />
           <YAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
-          <Tooltip />
+          <Tooltip content={({ active, payload }) => {
+            if (!active || !payload?.length) return null;
+            const d = payload[0].payload as typeof data[number];
+            return (
+              <div className="bg-white border border-zinc-200 shadow-sm rounded-lg px-3 py-2 text-xs space-y-1">
+                <p className="font-medium text-zinc-900">{d.name}</p>
+                <p>Total: {d.outcomes}</p>
+                <p className="text-green-600">Complete: {d.complete}</p>
+                <p className="text-blue-600">In progress: {d.in_progress}</p>
+                <p className="text-red-600">Delayed: {d.delayed}</p>
+                <p className="text-zinc-400">Not started: {d.not_started}</p>
+              </div>
+            );
+          }} />
           <Bar dataKey="outcomes" radius={[4, 4, 0, 0]}>
             {data.map((d, i) => (
               <Cell key={d.name} fill={i === 0 ? "#d30918" : "#e84555"} />

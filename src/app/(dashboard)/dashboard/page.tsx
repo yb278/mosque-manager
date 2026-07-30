@@ -7,7 +7,7 @@ function pct(n: number) {
 }
 
 function pctColor(v: number) {
-  return v >= 70 ? "#16a34a" : v >= 30 ? "#ca8a04" : "#dc2626";
+  return v >= 100 ? "#16a34a" : "#dc2626";
 }
 
 async function getStats() {
@@ -60,13 +60,19 @@ async function getStats() {
 
   const deptPieData = byDepartment.map(([name, value]) => ({ name, value }));
 
-  const leadMap = focusAreas.reduce<Record<string, number>>((acc, fa) => {
-    const count = outcomes.filter((o) => o.focusAreaId === fa.id).length;
-    acc[fa.sltLead] = (acc[fa.sltLead] || 0) + count;
+  const leadMap = focusAreas.reduce<Record<string, { outcomes: number; complete: number; in_progress: number; delayed: number; not_started: number }>>((acc, fa) => {
+    const areaOutcomes = outcomes.filter((o) => o.focusAreaId === fa.id);
+    const entry = acc[fa.sltLead] || { outcomes: 0, complete: 0, in_progress: 0, delayed: 0, not_started: 0 };
+    entry.outcomes += areaOutcomes.length;
+    entry.complete += areaOutcomes.filter((o) => o.status === "complete").length;
+    entry.in_progress += areaOutcomes.filter((o) => o.status === "in_progress").length;
+    entry.delayed += areaOutcomes.filter((o) => o.status === "delayed").length;
+    entry.not_started += areaOutcomes.filter((o) => o.status === "not_started").length;
+    acc[fa.sltLead] = entry;
     return acc;
   }, {});
   const leadData = Object.entries(leadMap)
-    .map(([name, outcomes]) => ({ name, outcomes }))
+    .map(([name, v]) => ({ name, ...v }))
     .sort((a, b) => b.outcomes - a.outcomes);
 
   const totalMilestones = milestones.length;
@@ -86,6 +92,7 @@ export default async function DashboardPage() {
 
   const totalOutcomes = data.outcomes.length;
   const totalComplete = data.outcomes.filter((o) => o.status === "complete").length;
+  const completedOutcomes = data.outcomes.filter((o) => o.status === "complete");
   const overallAvg =
     totalOutcomes > 0
       ? data.outcomes.reduce((sum, o) => sum + o.completePct, 0) / totalOutcomes
@@ -146,7 +153,7 @@ export default async function DashboardPage() {
                 <div className="h-3 rounded-full transition-all" style={{ width: `${area.avgPct}%`, backgroundColor: pctColor(area.avgPct) }} />
               </div>
               <div className="flex gap-3 mt-1 text-xs text-zinc-500">
-                <span className="text-green-600">{area.byStatus.complete} done</span>
+                <span className="text-green-600">{area.byStatus.complete} complete</span>
                 <span className="text-amber-600">{area.byStatus.in_progress} in prog</span>
                 <span className="text-red-600">{area.byStatus.delayed} delayed</span>
                 <span>{area.byStatus.not_started} not started</span>
@@ -156,6 +163,20 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {completedOutcomes.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
+          <h2 className="text-lg font-semibold mb-4">Completed Outcomes ({completedOutcomes.length})</h2>
+          <div className="space-y-2">
+            {completedOutcomes.map((o) => (
+              <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-zinc-100 last:border-0">
+                <span className="text-sm">{o.title}</span>
+                <span className="text-xs text-zinc-400">{o.focusArea.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
         <h2 className="text-lg font-semibold mb-4">Recent Outcomes</h2>

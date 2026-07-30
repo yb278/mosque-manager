@@ -13,7 +13,7 @@ function pctVal(n: number): number {
   return Math.round(n * 100);
 }
 function pctColor(v: number): string {
-  return v >= 70 ? "#16a34a" : v >= 30 ? "#ca8a04" : "#dc2626";
+  return v >= 100 ? "#16a34a" : "#dc2626";
 }
 
 export default async function OutcomesPage({
