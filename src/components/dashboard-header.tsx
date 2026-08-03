@@ -22,6 +22,7 @@ export default function DashboardHeader({ userName, role }: { userName: string; 
             <Link href="/overview" className="hover:text-red-200 transition-colors">Overview</Link>
             <Link href="/dashboard" className="hover:text-red-200 transition-colors">Strategy</Link>
             <Link href="/outcomes" className="hover:text-red-200 transition-colors">Outcomes</Link>
+            <Link href="/help" className="hover:text-red-200 transition-colors">Help</Link>
             {role === "admin" && (
               <Link href="/admin" className="hover:text-red-200 transition-colors">Admin</Link>
             )}
@@ -48,6 +49,7 @@ export default function DashboardHeader({ userName, role }: { userName: string; 
             <Link href="/overview" onClick={() => setMenuOpen(false)} className="py-2 text-white hover:text-red-200 transition-colors">Overview</Link>
             <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="py-2 text-white hover:text-red-200 transition-colors">Strategy</Link>
             <Link href="/outcomes" onClick={() => setMenuOpen(false)} className="py-2 text-white hover:text-red-200 transition-colors">Outcomes</Link>
+            <Link href="/help" onClick={() => setMenuOpen(false)} className="py-2 text-white hover:text-red-200 transition-colors">Help</Link>
             {role === "admin" && (
               <Link href="/admin" onClick={() => setMenuOpen(false)} className="py-2 text-white hover:text-red-200 transition-colors">Admin</Link>
             )}
