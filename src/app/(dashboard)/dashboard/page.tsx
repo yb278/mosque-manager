@@ -115,10 +115,6 @@ export default async function DashboardPage() {
           <p className="text-3xl font-bold text-zinc-900">{totalOutcomes}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-sm text-zinc-500">Total Milestones</p>
-          <p className="text-3xl font-bold text-zinc-900">{data.totalMilestones}</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Outcomes Completed</p>
           <p className="text-3xl font-bold text-green-600">{totalComplete}</p>
         </div>
@@ -131,6 +127,10 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Overall Progress</p>
           <p className="text-3xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
+          <p className="text-sm text-zinc-500">Total Milestones</p>
+          <p className="text-3xl font-bold text-zinc-900">{data.totalMilestones}</p>
         </div>
       </div>
 

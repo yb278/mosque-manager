@@ -70,10 +70,6 @@ export default async function OverviewPage() {
           <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalOutcomes}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Milestones</p>
-          <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalMilestones}</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Outcomes Completed</p>
           <p className="text-3xl font-bold text-green-600 mt-1">{data.totalComplete}</p>
         </div>
@@ -84,6 +80,10 @@ export default async function OverviewPage() {
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Overall Progress</p>
           <p className="text-3xl font-bold mt-1" style={{ color: pctColor(ov) }}>{ov}%</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
+          <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Milestones</p>
+          <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalMilestones}</p>
         </div>
       </div>
 
