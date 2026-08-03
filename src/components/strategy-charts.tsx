@@ -86,12 +86,18 @@ export function LeadBarChart({ data }: { data: { name: string; outcomes: number;
               </div>
             );
           }} />
-          <Bar dataKey="outcomes" radius={[4, 4, 0, 0]}>
-            {data.map((d, i) => (
-              <Cell key={d.name} fill={i === 0 ? "#d30918" : "#e84555"} />
-            ))}
-          </Bar>
+          {STATUS_ORDER.map((s) => (
+            <Bar key={s} dataKey={s} stackId="a" radius={[0, 0, 0, 0]} fill={STATUS_COLORS[s as keyof typeof STATUS_COLORS]} />
+          ))}
         </BarChart>
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs mt-2">
+          {STATUS_ORDER.map((s) => (
+            <span key={s} className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[s as keyof typeof STATUS_COLORS] }} />
+              {s.replace("_", " ")}
+            </span>
+          ))}
+        </div>
       </ResponsiveContainer>
     </div>
   );
