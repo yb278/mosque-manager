@@ -64,19 +64,7 @@ export default async function OverviewPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Overview</h1>
 
-      <div className="grid gap-6 md:grid-cols-5">
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Outcomes</p>
-          <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalOutcomes}</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide">Outcomes Completed</p>
-          <p className="text-3xl font-bold text-green-600 mt-1">{data.totalComplete}</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide">Outcomes In Progress</p>
-          <p className="text-3xl font-bold text-blue-600 mt-1">{data.statusCounts.find(s => s.name === "in_progress")?.value || 0}</p>
-        </div>
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Overall Progress</p>
           <p className="text-3xl font-bold mt-1" style={{ color: pctColor(ov) }}>{ov}%</p>
@@ -84,6 +72,20 @@ export default async function OverviewPage() {
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Milestones</p>
           <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalMilestones}</p>
+        </div>
+        <div className="col-span-2 md:col-span-3 bg-white rounded-xl shadow-sm border border-zinc-200 p-4 flex items-center justify-around">
+          <div className="text-center">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Outcomes</p>
+            <p className="text-3xl font-bold text-zinc-900 mt-1">{data.totalOutcomes}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide">Outcomes Completed</p>
+            <p className="text-3xl font-bold text-green-600 mt-1">{data.totalComplete}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide">Outcomes In Progress</p>
+            <p className="text-3xl font-bold text-blue-600 mt-1">{data.statusCounts.find(s => s.name === "in_progress")?.value || 0}</p>
+          </div>
         </div>
       </div>
 

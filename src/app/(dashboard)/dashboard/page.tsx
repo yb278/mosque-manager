@@ -109,21 +109,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-5">
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-sm text-zinc-500">Total Outcomes</p>
-          <p className="text-3xl font-bold text-zinc-900">{totalOutcomes}</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-sm text-zinc-500">Outcomes Completed</p>
-          <p className="text-3xl font-bold text-green-600">{totalComplete}</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
-          <p className="text-sm text-zinc-500">Outcomes In Progress</p>
-          <p className="text-3xl font-bold text-amber-600">
-            {data.outcomes.filter((o) => o.status === "in_progress").length}
-          </p>
-        </div>
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Overall Progress</p>
           <p className="text-3xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</p>
@@ -131,6 +117,22 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Total Milestones</p>
           <p className="text-3xl font-bold text-zinc-900">{data.totalMilestones}</p>
+        </div>
+        <div className="col-span-2 md:col-span-3 bg-white rounded-xl shadow-sm border border-zinc-200 p-4 flex items-center justify-around">
+          <div className="text-center">
+            <p className="text-sm text-zinc-500">Total Outcomes</p>
+            <p className="text-3xl font-bold text-zinc-900">{totalOutcomes}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-zinc-500">Outcomes Completed</p>
+            <p className="text-3xl font-bold text-green-600">{totalComplete}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-zinc-500">Outcomes In Progress</p>
+            <p className="text-3xl font-bold text-amber-600">
+              {data.outcomes.filter((o) => o.status === "in_progress").length}
+            </p>
+          </div>
         </div>
       </div>
 
