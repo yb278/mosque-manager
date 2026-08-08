@@ -6,6 +6,7 @@ import OutcomeEditor from "./outcome-editor";
 import DeleteButton from "./delete-button";
 import ArchiveButton from "./archive-button";
 import OutcomeAdminEditor from "./outcome-admin-editor";
+import BackToOutcomes from "./back-to-outcomes";
 import { formatDate, toInputDate } from "@/lib/dates";
 
 export default async function OutcomePage({
@@ -70,7 +71,7 @@ export default async function OutcomePage({
   return (
     <div className="max-w-3xl">
       <div className="mb-4">
-        <Link href="/outcomes" className="text-sm text-zinc-500 hover:text-primary">&larr; Back to outcomes</Link>
+        <BackToOutcomes />
       </div>
       <div className="mb-6 flex items-start justify-between">
         <div>

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { OUTCOMES_VIEW_KEY } from "../view-tracker";
 
 export default function DeleteButton({ outcomeId }: { outcomeId: string }) {
   const router = useRouter();
@@ -15,7 +16,8 @@ export default function DeleteButton({ outcomeId }: { outcomeId: string }) {
     });
 
     if (res.ok) {
-      router.push("/outcomes");
+      const saved = sessionStorage.getItem(OUTCOMES_VIEW_KEY);
+      router.push(saved || "/outcomes");
       router.refresh();
     } else {
       setDeleting(false);

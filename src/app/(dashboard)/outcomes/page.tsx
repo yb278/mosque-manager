@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
+import OutcomesViewTracker from "./view-tracker";
 
 const STATUS_COLORS: Record<string, string> = {
   complete: "bg-green-100 text-green-700",
@@ -47,7 +49,7 @@ export default async function OutcomesPage({
     return { id: sortBy === "id" ? sortDir : "asc" };
   }
 
-  let outcomes = await prisma.outcome.findMany({
+  const outcomes = await prisma.outcome.findMany({
     where,
     include: { focusArea: true, assignments: { include: { user: true } } },
     orderBy: dbOrderBy(),
@@ -83,6 +85,9 @@ export default async function OutcomesPage({
 
   return (
     <div className="space-y-6">
+      <Suspense fallback={null}>
+        <OutcomesViewTracker />
+      </Suspense>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{isMyTasks ? "My Tasks" : "All Outcomes"}</h1>
         <div className="flex items-center gap-3">
