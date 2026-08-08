@@ -6,11 +6,9 @@ import { useState } from "react";
 export default function RoleToggle({
   userId,
   currentRole,
-  userName,
 }: {
   userId: number;
   currentRole: string;
-  userName: string;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);

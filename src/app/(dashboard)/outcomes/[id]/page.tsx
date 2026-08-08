@@ -7,7 +7,7 @@ import DeleteButton from "./delete-button";
 import ArchiveButton from "./archive-button";
 import OutcomeAdminEditor from "./outcome-admin-editor";
 import BackToOutcomes from "./back-to-outcomes";
-import { formatDate, toInputDate } from "@/lib/dates";
+import { formatDate } from "@/lib/dates";
 
 export default async function OutcomePage({
   params,

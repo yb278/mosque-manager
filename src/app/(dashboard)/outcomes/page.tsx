@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 import OutcomesViewTracker from "./view-tracker";
+import { pct, pctColor } from "@/lib/format";
 
 const STATUS_COLORS: Record<string, string> = {
   complete: "bg-green-100 text-green-700",
@@ -10,15 +11,6 @@ const STATUS_COLORS: Record<string, string> = {
   delayed: "bg-red-100 text-red-700",
   not_started: "bg-zinc-100 text-zinc-500",
 };
-
-function pctVal(n: number): number {
-  return Math.round(n * 100);
-}
-function pctColor(v: number): string {
-  const pct = Math.min(v, 100);
-  const hue = pct <= 70 ? (pct / 70) * 60 : 60 + ((pct - 70) / 30) * 60;
-  return `hsl(${hue}, 75%, 40%)`;
-}
 
 export default async function OutcomesPage({
   searchParams,
@@ -198,9 +190,9 @@ export default async function OutcomesPage({
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
                     <div className="w-16 bg-zinc-200 rounded-full h-2">
-                      <div className="h-2 rounded-full" style={{ width: `${pctVal(o.completePct)}%`, backgroundColor: pctColor(pctVal(o.completePct)) }} />
+                      <div className="h-2 rounded-full" style={{ width: `${pct(o.completePct)}%`, backgroundColor: pctColor(pct(o.completePct)) }} />
                     </div>
-                    <span className="text-xs" style={{ color: pctColor(pctVal(o.completePct)) }}>{pctVal(o.completePct)}%</span>
+                    <span className="text-xs" style={{ color: pctColor(pct(o.completePct)) }}>{pct(o.completePct)}%</span>
                   </div>
                 </td>
               </tr>
@@ -225,9 +217,9 @@ export default async function OutcomesPage({
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-zinc-200 rounded-full h-2">
-                <div className="h-2 rounded-full" style={{ width: `${pctVal(o.completePct)}%`, backgroundColor: pctColor(pctVal(o.completePct)) }} />
+                <div className="h-2 rounded-full" style={{ width: `${pct(o.completePct)}%`, backgroundColor: pctColor(pct(o.completePct)) }} />
               </div>
-              <span className="text-xs font-medium" style={{ color: pctColor(pctVal(o.completePct)) }}>{pctVal(o.completePct)}%</span>
+              <span className="text-xs font-medium" style={{ color: pctColor(pct(o.completePct)) }}>{pct(o.completePct)}%</span>
             </div>
           </Link>
         ))}

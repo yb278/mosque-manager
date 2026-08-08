@@ -82,7 +82,7 @@ export default async function AdminPage() {
                   </td>
                   <td className="py-2 flex gap-2 items-start">
                     <EditUserButton userId={u.id} userName={u.name} userEmail={u.email} />
-                    <RoleToggle userId={u.id} currentRole={u.role} userName={u.name} />
+                    <RoleToggle userId={u.id} currentRole={u.role} />
                     <ResetPasswordButton userId={u.id} userName={u.name} />
                     <DeleteUserButton userId={u.id} userName={u.name} />
                   </td>
@@ -105,7 +105,7 @@ export default async function AdminPage() {
               <p className="text-xs text-zinc-400 mb-3">Created: {u.createdAt.toLocaleDateString("en-GB")}</p>
               <div className="flex gap-2 flex-wrap">
                 <EditUserButton userId={u.id} userName={u.name} userEmail={u.email} />
-                <RoleToggle userId={u.id} currentRole={u.role} userName={u.name} />
+                <RoleToggle userId={u.id} currentRole={u.role} />
                 <ResetPasswordButton userId={u.id} userName={u.name} />
                 <DeleteUserButton userId={u.id} userName={u.name} />
               </div>

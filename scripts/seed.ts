@@ -52,12 +52,6 @@ function parsePct(s: string | undefined | number) {
   return n;
 }
 
-function extractOutcomeId(rowId: string, focusAreaName: string) {
-  const prefix = FOCUS_AREA_IDS[focusAreaName] || "XX";
-  const num = rowId.replace(prefix, "");
-  return rowId;
-}
-
 async function main() {
   console.log("Reading spreadsheet...");
   const workbook = XLSX.readFile("07__AEC_Strategy_2025-2026_Tracker.xlsx");
@@ -71,7 +65,7 @@ async function main() {
 
   // --- Seed focus areas ---
   console.log("Seeding focus areas...");
-  for (const [_, fa] of Object.entries(FOCUS_AREA_MAP)) {
+  for (const fa of Object.values(FOCUS_AREA_MAP)) {
     await prisma.focusArea.create({
       data: {
         id: FOCUS_AREA_IDS[fa.name],
@@ -142,7 +136,7 @@ async function main() {
     const rawId = String(row._id || "").trim();
     if (!rawId) continue;
 
-    const outcomeId = extractOutcomeId(rawId, focusAreaName);
+    const outcomeId = rawId;
     const persons = String(row.responsiblePerson || "").split("/").map(s => s.trim()).filter(Boolean);
 
     for (const person of persons) {

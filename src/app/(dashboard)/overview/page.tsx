@@ -1,15 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { OverallPie, AreaBarChart, FocusAreaPies } from "@/components/dashboard-charts";
-
-function pct(n: number) {
-  return Math.round(n * 100);
-}
-
-function pctColor(v: number) {
-  const pct = Math.min(v, 100);
-  const hue = pct <= 70 ? (pct / 70) * 60 : 60 + ((pct - 70) / 30) * 60;
-  return `hsl(${hue}, 75%, 40%)`;
-}
+import { pct, pctColor } from "@/lib/format";
 
 async function getData() {
   const outcomes = await prisma.outcome.findMany({
