@@ -35,6 +35,18 @@ function getReplyTo(): { Email: string; Name: string } | undefined {
   return { Email: raw.trim(), Name: "AEC Projects" };
 }
 
+function getBaseUrl(): string {
+  const raw =
+    process.env.NEXTAUTH_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  if (!raw) return "http://localhost:3000";
+  // In production, warn if still pointing at localhost (would generate broken email links)
+  if (raw.includes("localhost") && process.env.NODE_ENV === "production") {
+    console.warn(`NEXTAUTH_URL is still localhost in production: ${raw}`);
+  }
+  return raw.replace(/\/$/, "");
+}
+
 async function sendViaMailjet(params: {
   to: string;
   toName: string;
@@ -77,7 +89,7 @@ export async function sendPasswordEmail(to: string, name: string, password: stri
         <tr><td style="font-size:12px;color:#71717a;padding-top:8px">Password</td></tr>
         <tr><td style="font-weight:bold;font-size:14px;font-family:monospace">${password}</td></tr>
       </table>
-      <a href="${process.env.NEXTAUTH_URL}/login" style="display:inline-block;background:#d30918;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px">Sign In</a>
+      <a href="${getBaseUrl()}/login" style="display:inline-block;background:#d30918;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px">Sign In</a>
       <p style="font-size:12px;color:#71717a;margin-top:16px">You'll be asked to set a new password on first login.</p>
     </div>`;
 
@@ -85,7 +97,7 @@ export async function sendPasswordEmail(to: string, name: string, password: stri
 }
 
 export async function sendResetEmail(to: string, name: string, token: string) {
-  const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
+  const resetUrl = `${getBaseUrl()}/reset-password?token=${token}`;
   const html = `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
       <h2 style="color:#d30918">Reset your password</h2>
       <p>Hi ${name},</p>
