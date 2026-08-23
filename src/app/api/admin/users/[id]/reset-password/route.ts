@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { randomBytes } from "crypto";
 import { sendPasswordEmail } from "@/lib/email";
+import { logActivity } from "@/lib/activity";
 
 export async function POST(
   _req: Request,
@@ -32,6 +33,13 @@ export async function POST(
     });
 
     await sendPasswordEmail(user.email, user.name, rawPassword);
+    await logActivity(
+      Number(session.user.id),
+      "user.resetPassword",
+      "user",
+      String(userId),
+      `Password reset for "${user.name}"`
+    );
 
     return NextResponse.json({ message: "Password reset email sent" });
   } catch (error) {

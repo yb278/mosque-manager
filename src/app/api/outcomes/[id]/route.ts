@@ -80,6 +80,52 @@ export async function PATCH(
       }
     }
 
+    const progressChanged =
+      (isAdmin || isAssigned) && PROGRESS_FIELDS.some((f) => body[f] !== undefined);
+
+    if (progressChanged) {
+      await tx.outcomeProgress.create({
+        data: {
+          outcomeId: id,
+          status: (data.status as typeof outcome.status) ?? outcome.status,
+          completePct: (data.completePct as number) ?? outcome.completePct,
+          reasonForDelay: (data.reasonForDelay as string | null) ?? outcome.reasonForDelay,
+          notes: (data.notes as string | null) ?? outcome.notes,
+          userId,
+        },
+      });
+    }
+
+    const changes: string[] = [];
+    for (const field of PROGRESS_FIELDS) {
+      if (body[field] !== undefined && body[field] !== outcome[field]) {
+        changes.push(`${field}: ${outcome[field] ?? "—"} → ${body[field] ?? "—"}`);
+      }
+    }
+    for (const field of ADMIN_FIELDS) {
+      if (isAdmin && body[field] !== undefined && body[field] !== outcome[field]) {
+        changes.push(field === "archived" ? (body.archived ? "archived" : "unarchived") : `${field} updated`);
+      }
+    }
+    if (body.milestones !== undefined) {
+      changes.push(`milestones set to ${body.milestones.length}`);
+    }
+    if (isAdmin && body.userIds !== undefined) {
+      changes.push(`owners set to ${body.userIds.length}`);
+    }
+
+    if (changes.length > 0) {
+      await tx.activityLog.create({
+        data: {
+          userId,
+          action: "outcome.update",
+          entityType: "outcome",
+          entityId: id,
+          details: changes.join("; "),
+        },
+      });
+    }
+
     return updated;
   });
 
@@ -101,6 +147,16 @@ export async function DELETE(
   if (!outcome) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  await prisma.activityLog.create({
+    data: {
+      userId: Number(session.user.id),
+      action: "outcome.delete",
+      entityType: "outcome",
+      entityId: id,
+      details: outcome.title,
+    },
+  });
 
   await prisma.milestone.deleteMany({ where: { outcomeId: id } });
   await prisma.outcome.delete({ where: { id } });

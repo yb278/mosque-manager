@@ -8,7 +8,10 @@ export default async function CreateOutcomePage() {
   if (!session?.user || session.user.role !== "admin") redirect("/outcomes");
 
   const focusAreas = await prisma.focusArea.findMany();
-  const users = await prisma.user.findMany({ orderBy: { name: "asc" } });
+  const users = await prisma.user.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+  });
 
   return (
     <div className="max-w-xl">

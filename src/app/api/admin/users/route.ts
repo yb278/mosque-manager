@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { randomBytes } from "crypto";
 import { sendPasswordEmail } from "@/lib/email";
+import { logActivity } from "@/lib/activity";
 
 export async function POST(req: Request) {
   try {
@@ -38,6 +39,13 @@ export async function POST(req: Request) {
     });
 
     await sendPasswordEmail(email, name, rawPassword);
+    await logActivity(
+      Number(session.user.id),
+      "user.create",
+      "user",
+      String(user.id),
+      user.name
+    );
 
     return NextResponse.json({
       id: user.id,

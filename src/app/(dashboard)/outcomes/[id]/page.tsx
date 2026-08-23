@@ -40,7 +40,10 @@ export default async function OutcomePage({
   const assignedUsers = outcome.assignments.map((a) => a.user);
 
   if (showEditMode) {
-    const users = await prisma.user.findMany({ orderBy: { name: "asc" } });
+    const users = await prisma.user.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+    });
     return (
       <div className="max-w-3xl">
         <div className="mb-6">
@@ -122,6 +125,10 @@ export default async function OutcomePage({
             <div>
               <dt className="text-zinc-500">Department</dt>
               <dd>{outcome.department || "-"}</dd>
+            </div>
+            <div>
+              <dt className="text-zinc-500">Last Updated</dt>
+              <dd>{outcome.updatedAt.toLocaleDateString("en-GB")}</dd>
             </div>
           </dl>
         </div>

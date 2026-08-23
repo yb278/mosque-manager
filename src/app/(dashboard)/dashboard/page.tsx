@@ -70,11 +70,10 @@ async function getStats() {
 
   const totalMilestones = milestones.length;
 
-  const recentOutcomeIds = (await prisma.$queryRaw<{ id: string }[]>`
-    SELECT id FROM Outcome WHERE archived = 0 ORDER BY rowid DESC LIMIT 10
-  `).map(r => r.id);
-  const outcomeMap = new Map(outcomes.map((o) => [o.id, o]));
-  const recentOutcomes = recentOutcomeIds.map((id) => outcomeMap.get(id)).filter(Boolean) as typeof outcomes;
+  const recentOutcomes = outcomes
+    .slice()
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .slice(0, 10);
 
   return { outcomes, recentOutcomes, byArea, byDepartment, stackedData, deptPieData, leadData, totalMilestones };
 }
@@ -159,7 +158,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
-        <h2 className="text-lg font-semibold mb-4">Recent Outcomes</h2>
+        <h2 className="text-lg font-semibold mb-4">Recently Edited</h2>
         <div className="space-y-2">
           {data.recentOutcomes.map((o) => (
             <div
@@ -170,6 +169,9 @@ export default async function DashboardPage() {
                 <span className="text-sm font-medium">{o.title}</span>
                 <span className="text-xs text-zinc-400 ml-2">
                   {o.focusArea.name}
+                </span>
+                <span className="text-xs text-zinc-400 ml-2">
+                  · updated {o.updatedAt.toLocaleDateString("en-GB")}
                 </span>
               </div>
               <div className="flex items-center gap-3">

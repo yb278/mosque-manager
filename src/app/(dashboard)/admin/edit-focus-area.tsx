@@ -2,17 +2,25 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import DeleteFocusAreaButton from "./delete-focus-area-button";
 
 export default function EditFocusArea({
   focusArea,
+  users,
+  outcomeCount,
 }: {
   focusArea: { id: string; name: string; sltLead: string };
+  users: { id: number; name: string }[];
+  outcomeCount?: number;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(focusArea.name);
   const [sltLead, setSltLead] = useState(focusArea.sltLead);
   const [saving, setSaving] = useState(false);
+
+  const sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name));
+  const currentInList = sortedUsers.some((u) => u.name === focusArea.sltLead);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -43,9 +51,16 @@ export default function EditFocusArea({
           <p className="text-sm font-medium">{focusArea.name}</p>
           <p className="text-xs text-zinc-400">Lead: {focusArea.sltLead}</p>
         </div>
-        <button onClick={() => setEditing(true)} className="text-xs text-primary hover:underline shrink-0">
-          Edit
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          <button onClick={() => setEditing(true)} className="text-xs text-primary hover:underline">
+            Edit
+          </button>
+          <DeleteFocusAreaButton
+            id={focusArea.id}
+            name={focusArea.name}
+            outcomeCount={outcomeCount ?? 0}
+          />
+        </div>
       </div>
     );
   }
@@ -59,12 +74,20 @@ export default function EditFocusArea({
           className="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           required
         />
-        <input
+        <select
           value={sltLead}
           onChange={(e) => setSltLead(e.target.value)}
           className="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          placeholder="SLT Lead"
-        />
+        >
+          {!currentInList && (
+            <option value={focusArea.sltLead}>{focusArea.sltLead} (current)</option>
+          )}
+          {sortedUsers.map((u) => (
+            <option key={u.id} value={u.name}>
+              {u.name}
+            </option>
+          ))}
+        </select>
         <div className="flex gap-2">
           <button type="submit" disabled={saving} className="text-xs px-3 py-1.5 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50">
             {saving ? "Saving..." : "Save"}

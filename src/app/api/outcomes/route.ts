@@ -44,6 +44,16 @@ export async function POST(req: Request) {
       },
     });
 
+    await prisma.activityLog.create({
+      data: {
+        userId: Number(session.user.id),
+        action: "outcome.create",
+        entityType: "outcome",
+        entityId: outcome.id,
+        details: outcome.title,
+      },
+    });
+
     return NextResponse.json({ id: outcome.id });
   } catch (error) {
     console.error("Error creating outcome:", error);

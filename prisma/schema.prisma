@@ -28,6 +28,8 @@ model User {
   role               Role       @default(viewer)
   mustChangePassword Boolean    @default(true)
   createdAt          DateTime   @default(now())
+  isActive           Boolean    @default(true)
+  archivedAt         DateTime?
   assignments        OutcomeAssignment[]
 }
 
@@ -59,8 +61,11 @@ model Outcome {
   completePct     Float    @default(0)
   notes           String?
   archived        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
   milestones      Milestone[]
   assignments     OutcomeAssignment[]
+  progress        OutcomeProgress[]
 }
 
 model OutcomeAssignment {
@@ -78,6 +83,34 @@ model Milestone {
   outcome     Outcome  @relation(fields: [outcomeId], references: [id])
   description String
   targetDate  String?
+  createdAt   DateTime @default(now())
+}
+
+model OutcomeProgress {
+  id             Int      @id @default(autoincrement())
+  outcomeId      String
+  outcome        Outcome  @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  status         Status   @default(not_started)
+  completePct    Float    @default(0)
+  reasonForDelay String?
+  notes          String?
+  userId         Int?
+  createdAt      DateTime @default(now())
+
+  @@index([outcomeId, createdAt])
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  action     String
+  entityType String
+  entityId   String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
 }
 
 model PasswordResetToken {

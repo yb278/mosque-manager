@@ -57,6 +57,7 @@ async function main() {
   const workbook = XLSX.readFile("07__AEC_Strategy_2025-2026_Tracker.xlsx");
 
   // --- Clear existing data ---
+  await prisma.activityLog.deleteMany();
   await prisma.opexReview.deleteMany();
   await prisma.milestone.deleteMany();
   await prisma.outcome.deleteMany();
@@ -176,6 +177,22 @@ async function main() {
         data: { outcomeId, userId: user.id },
       }).catch(() => {});
     }
+  }
+
+  // --- Baseline progress snapshots ---
+  console.log("Seeding baseline progress snapshots...");
+  const seededOutcomes = await prisma.outcome.findMany();
+  for (const o of seededOutcomes) {
+    await prisma.outcomeProgress.create({
+      data: {
+        outcomeId: o.id,
+        status: o.status,
+        completePct: o.completePct,
+        reasonForDelay: o.reasonForDelay,
+        notes: o.notes,
+        userId: null,
+      },
+    });
   }
 
   // --- Seed milestones from the focus area sheets ---

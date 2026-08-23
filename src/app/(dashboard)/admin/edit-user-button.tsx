@@ -27,7 +27,10 @@ export default function EditUserButton({
     const res = await fetch(`/api/admin/users/${userId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), name: name.trim() || undefined }),
+      body: JSON.stringify({
+        email: email.trim(),
+        name: name.trim() || undefined,
+      }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -60,7 +63,7 @@ export default function EditUserButton({
   }
 
   return (
-    <div className="flex flex-col gap-1.5 min-w-48">
+    <div className="flex flex-col gap-1.5 min-w-56">
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
