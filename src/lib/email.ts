@@ -1,17 +1,73 @@
-import { Resend } from "resend";
+import Mailjet from "node-mailjet";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+function getMailjet() {
+  const apiKey = process.env.MAILJET_API_KEY;
+  const apiSecret = process.env.MAILJET_API_SECRET;
+  if (!apiKey || !apiSecret) {
+    throw new Error("MAILJET_API_KEY / MAILJET_API_SECRET not set");
+  }
+  return Mailjet.apiConnect(apiKey, apiSecret);
+}
 
-export async function sendPasswordEmail(
-  to: string,
-  name: string,
-  password: string
-) {
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM || "AEC Strategy <noreply@yourdomain.com>",
-    to,
-    subject: "Your AEC Strategy account",
-    html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+function parseSender(raw: string): { Email: string; Name: string } {
+  const m = raw.match(/^(.*?)\s*<\s*(.+?)\s*>\s*$/);
+  if (m) {
+    const name = m[1].trim().replace(/^["']|["']$/g, "") || "AEC Strategy";
+    return { Email: m[2].trim(), Name: name };
+  }
+  return { Email: raw.trim(), Name: "AEC Strategy" };
+}
+
+function getFrom() {
+  const raw = process.env.EMAIL_FROM || "AEC Strategy <yaseen.barlas@al-emaan.org.uk>";
+  return parseSender(raw);
+}
+
+function getReplyTo(): { Email: string; Name: string } | undefined {
+  const raw = process.env.EMAIL_REPLY_TO || "projects_dashboard@al-emaan.org.uk";
+  if (!raw) return undefined;
+  // allow "Name <email>" or plain email
+  const m = raw.match(/^(.*?)\s*<\s*(.+?)\s*>\s*$/);
+  if (m) {
+    const name = m[1].trim().replace(/^["']|["']$/g, "") || "AEC Projects";
+    return { Email: m[2].trim(), Name: name };
+  }
+  return { Email: raw.trim(), Name: "AEC Projects" };
+}
+
+async function sendViaMailjet(params: {
+  to: string;
+  toName: string;
+  subject: string;
+  html: string;
+}) {
+  const mailjet = getMailjet();
+  const From = getFrom();
+  const ReplyTo = getReplyTo();
+
+  const payload: Record<string, unknown> = {
+    Messages: [
+      {
+        From,
+        To: [{ Email: params.to, Name: params.toName }],
+        ...(ReplyTo ? { ReplyTo } : {}),
+        Subject: params.subject,
+        HTMLPart: params.html,
+      },
+    ],
+  };
+
+  const result = await mailjet.post("send", { version: "v3.1" }).request(payload);
+  const body = result.body as { Messages?: Array<{ Status: string; Errors?: unknown }> };
+  const status = body?.Messages?.[0]?.Status;
+  if (status !== "success") {
+    console.error("Mailjet send failed:", JSON.stringify(body));
+    throw new Error(`Mailjet send failed: ${status || "unknown"}`);
+  }
+}
+
+export async function sendPasswordEmail(to: string, name: string, password: string) {
+  const html = `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
       <h2 style="color:#d30918">Welcome to AEC Strategy</h2>
       <p>Hi ${name},</p>
       <p>Your account has been created. Use the credentials below to sign in:</p>
@@ -23,26 +79,20 @@ export async function sendPasswordEmail(
       </table>
       <a href="${process.env.NEXTAUTH_URL}/login" style="display:inline-block;background:#d30918;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px">Sign In</a>
       <p style="font-size:12px;color:#71717a;margin-top:16px">You'll be asked to set a new password on first login.</p>
-    </div>`,
-  });
+    </div>`;
+
+  await sendViaMailjet({ to, toName: name, subject: "Your AEC Strategy account", html });
 }
 
-export async function sendResetEmail(
-  to: string,
-  name: string,
-  token: string
-) {
+export async function sendResetEmail(to: string, name: string, token: string) {
   const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM || "AEC Strategy <noreply@yourdomain.com>",
-    to,
-    subject: "Reset your AEC Strategy password",
-    html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+  const html = `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
       <h2 style="color:#d30918">Reset your password</h2>
       <p>Hi ${name},</p>
       <p>Click the button below to reset your password. This link expires in 1 hour.</p>
       <a href="${resetUrl}" style="display:inline-block;background:#d30918;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px">Reset Password</a>
       <p style="font-size:12px;color:#71717a;margin-top:16px">If you didn't request this, you can ignore this email.</p>
-    </div>`,
-  });
+    </div>`;
+
+  await sendViaMailjet({ to, toName: name, subject: "Reset your AEC Strategy password", html });
 }
