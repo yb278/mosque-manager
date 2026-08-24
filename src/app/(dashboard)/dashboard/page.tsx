@@ -89,7 +89,7 @@ export default async function DashboardPage() {
     totalOutcomes > 0
       ? data.outcomes.reduce((sum, o) => sum + o.completePct, 0) / totalOutcomes
       : 0;
-  const ov = pct(overallAvg);
+  const ov = overallAvg * 100;
 
   return (
     <div className="space-y-6">
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Overall Progress</p>
-          <p className="text-3xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</p>
+          <p className="text-3xl font-bold" style={{ color: pctColor(ov) }}>{ov.toFixed(1)}%</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Total Milestones</p>

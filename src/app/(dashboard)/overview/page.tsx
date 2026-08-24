@@ -49,7 +49,7 @@ async function getData() {
 
 export default async function OverviewPage() {
   const data = await getData();
-  const ov = pct(data.overallAvg);
+  const ov = data.overallAvg * 100;
 
   return (
     <div className="space-y-6">
@@ -58,7 +58,7 @@ export default async function OverviewPage() {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Overall Progress</p>
-          <p className="text-3xl font-bold mt-1" style={{ color: pctColor(ov) }}>{ov}%</p>
+          <p className="text-3xl font-bold mt-1" style={{ color: pctColor(ov) }}>{ov.toFixed(1)}%</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Milestones</p>
@@ -85,9 +85,9 @@ export default async function OverviewPage() {
           <div className="flex-1 bg-zinc-200 rounded-full h-5">
             <div className="h-5 rounded-full transition-all" style={{ width: `${ov}%`, backgroundColor: pctColor(ov) }} />
           </div>
-          <span className="text-2xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</span>
+          <span className="text-2xl font-bold" style={{ color: pctColor(ov) }}>{ov.toFixed(1)}%</span>
         </div>
-        <p className="text-sm text-zinc-500 mt-2">{data.totalComplete}/{data.totalOutcomes} outcomes completed &middot; {ov}% overall</p>
+        <p className="text-sm text-zinc-500 mt-2">{data.totalComplete}/{data.totalOutcomes} outcomes completed &middot; {ov.toFixed(1)}% overall</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
