@@ -30,7 +30,7 @@ async function getStats() {
       delayed: areaOutcomes.filter((o) => o.status === "delayed").length,
     };
     const milestoneCount = milestones.filter((m) => m.outcome.focusAreaId === fa.id).length;
-    return { ...fa, total, avgPct: pct(avgPct), byStatus, milestoneCount };
+    return { ...fa, total, avgPct: pct(avgPct), avgPctRaw: avgPct, byStatus, milestoneCount };
   });
 
   const byDepartment = Object.entries(
@@ -85,11 +85,12 @@ export default async function DashboardPage() {
 
   const totalOutcomes = data.outcomes.length;
   const totalComplete = data.outcomes.filter((o) => o.status === "complete").length;
+  const activeAreas = data.byArea.filter((a) => a.total > 0);
   const overallAvg =
-    totalOutcomes > 0
-      ? data.outcomes.reduce((sum, o) => sum + o.completePct, 0) / totalOutcomes
+    activeAreas.length > 0
+      ? activeAreas.reduce((sum, a) => sum + a.avgPctRaw, 0) / activeAreas.length
       : 0;
-  const ov = overallAvg * 100;
+  const ov = pct(overallAvg);
 
   return (
     <div className="space-y-6">
@@ -103,7 +104,7 @@ export default async function DashboardPage() {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Overall Progress</p>
-          <p className="text-3xl font-bold" style={{ color: pctColor(ov) }}>{ov.toFixed(1)}%</p>
+          <p className="text-3xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-sm text-zinc-500">Total Milestones</p>

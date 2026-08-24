@@ -20,12 +20,16 @@ async function getData() {
     const complete = areaOutcomes.filter((o) => o.status === "complete").length;
     const avgPct = total > 0 ? areaOutcomes.reduce((sum, o) => sum + o.completePct, 0) / total : 0;
     const milestoneCount = milestones.filter((m) => m.outcome.focusAreaId === fa.id).length;
-    return { name: fa.name, sltLead: fa.sltLead, totalOutcomes: total, completeOutcomes: complete, avgCompletePct: pct(avgPct), milestoneCount };
+    return { name: fa.name, sltLead: fa.sltLead, totalOutcomes: total, completeOutcomes: complete, avgCompletePct: pct(avgPct), avgPctRaw: avgPct, milestoneCount };
   });
 
   const totalOutcomes = outcomes.length;
   const totalComplete = outcomes.filter((o) => o.status === "complete").length;
-  const overallAvg = totalOutcomes > 0 ? outcomes.reduce((sum, o) => sum + o.completePct, 0) / totalOutcomes : 0;
+  const activeAreas = areaStats.filter((a) => a.totalOutcomes > 0);
+  const overallAvg =
+    activeAreas.length > 0
+      ? activeAreas.reduce((sum, a) => sum + a.avgPctRaw, 0) / activeAreas.length
+      : 0;
 
   const statusCounts = [
     { name: "complete", value: outcomes.filter((o) => o.status === "complete").length },
@@ -49,7 +53,7 @@ async function getData() {
 
 export default async function OverviewPage() {
   const data = await getData();
-  const ov = data.overallAvg * 100;
+  const ov = pct(data.overallAvg);
 
   return (
     <div className="space-y-6">
@@ -58,7 +62,7 @@ export default async function OverviewPage() {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Overall Progress</p>
-          <p className="text-3xl font-bold mt-1" style={{ color: pctColor(ov) }}>{ov.toFixed(1)}%</p>
+          <p className="text-3xl font-bold mt-1" style={{ color: pctColor(ov) }}>{ov}%</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-wide">Total Milestones</p>
@@ -85,9 +89,9 @@ export default async function OverviewPage() {
           <div className="flex-1 bg-zinc-200 rounded-full h-5">
             <div className="h-5 rounded-full transition-all" style={{ width: `${ov}%`, backgroundColor: pctColor(ov) }} />
           </div>
-          <span className="text-2xl font-bold" style={{ color: pctColor(ov) }}>{ov.toFixed(1)}%</span>
+          <span className="text-2xl font-bold" style={{ color: pctColor(ov) }}>{ov}%</span>
         </div>
-        <p className="text-sm text-zinc-500 mt-2">{data.totalComplete}/{data.totalOutcomes} outcomes completed &middot; {ov.toFixed(1)}% overall</p>
+        <p className="text-sm text-zinc-500 mt-2">{data.totalComplete}/{data.totalOutcomes} outcomes completed &middot; {ov}% overall</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
